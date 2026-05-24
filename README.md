@@ -6,30 +6,62 @@ Sistema para la gestión de proyectos docentes de la Universidad de Cartagena, p
 
 - **Backend en Go**: API REST con arquitectura en capas (models, repository, service, handlers)
 - **Frontend en React**: SPA con React Router, Tailwind CSS y Axios
-- **Base de Datos**: PostgreSQL con migraciones SQL
+- **Base de Datos**: PostgreSQL con migraciones SQL y seed data
 - **Autenticación**: JWT con middleware de autenticación y autorización por roles
 - **Control de Estados**: Máquina de estados para el flujo de aprobación de proyectos
 - **Seguimiento de Clases**: Registro de seguimiento para proyectos aprobados
+- **Manejo Robusto de Errores**: Null checks y manejo defensivo en el frontend para prevenir crashes
+- **Actualización Optimista**: Actualización inmediata del estado local para mejor UX
+- **Advertencia de Cambios**: Alerta al intentar salir con cambios no guardados
+- **Campos Nullable**: Soporte para campos opcionales en la base de datos (prerrequisitos, correquisitos, fechas)
 
 ## Roles del Sistema
 
+Los roles están organizados en grupos de permisos para simplificar la gestión:
+
+**Grupo DOCENTE:**
 - **DOCENTE**: Crea y edita proyectos docente, envía para revisión
-- **JEFE_DEPARTAMENTO**: Revisa y aprueba/devuelve proyectos
-- **DIRECTOR_PROGRAMA**: Revisa y aprueba/devuelve proyectos
-- **COORDINADOR_PROGRAMA**: Revisa y aprueba/devuelve proyectos
-- **COMITE_CURRICULAR**: Revisa y aprueba/devuelve proyectos
-- **DECANO**: Aprueba proyectos finales
+
+**Grupo REVISION (mismos permisos):**
+- **JEFE_DEPARTAMENTO**: Revisa proyectos (EN_REVISION → REVISADO)
+- **DIRECTOR_PROGRAMA**: Revisa proyectos (EN_REVISION → REVISADO)
+- **COORDINADOR_PROGRAMA**: Revisa proyectos (EN_REVISION → REVISADO)
+
+**Grupo COMITE (mismos permisos):**
+- **COMITE_CURRICULAR**: Verifica proyectos (REVISADO → AVALADO)
+- **COMITE_ACADEMICO_INSTITUTO**: Verifica proyectos (REVISADO → AVALADO)
+
+**Grupo APROBACION_FINAL:**
+- **DECANO**: Aprueba proyectos finales (AVALADO → APROBADO)
+
+**Otros roles:**
 - **ESTUDIANTE**: Consulta proyectos aprobados
 - **ADMIN**: Gestiona usuarios, cursos y programas
 
-## Estados del Proyecto
+## Estados del Proyecto (Flujo Simplificado)
 
-1. **BORRADOR**: Proyecto en creación por el docente
-2. **EN_REVISION_JEFE**: En revisión por Jefe de Departamento
-3. **EN_REVISION_COMITE**: En revisión por Comité Curricular
-4. **EN_APROBACION_DECANO**: En aprobación por Decano
-5. **DEVUELTO_DOCENTE**: Devuelto al docente con observaciones
-6. **APROBADO**: Proyecto aprobado y disponible para seguimiento
+1. **ELABORADO**: Proyecto en creación por el docente (antes de enviar a revisión)
+2. **EN_REVISION**: Una vez el docente lo envía a revisión
+3. **REVISADO**: Una vez el Jefe de Departamento, Director de Programa o Coordinador de Programa lo revisa
+4. **AVALADO**: Una vez el Comité Curricular o Comité Académico de Instituto lo verifica
+5. **APROBADO**: Una vez el Decano o Comité Académico de Instituto lo aprueba
+
+**Flujo de Aprobación:**
+- DOCENTE envía: ELABORADO → EN_REVISION
+- Grupo REVISION (Jefe/Director/Coordinador) revisa: EN_REVISION → REVISADO
+- Grupo COMITE (Comité Curricular/Comité Académico) verifica: REVISADO → AVALADO
+- Grupo APROBACION_FINAL (Decano/Comité Académico) aprueba: AVALADO → APROBADO
+
+**Nota:** La acción de aprobar es la misma para todos los grupos, pero la terminología cambia según el estado: "Revisar" para el grupo REVISION, "Verificar" para el grupo COMITE, y "Aprobar" para el grupo APROBACION_FINAL.
+
+## Mejoras Recientes
+
+- **Manejo de Errores en Frontend**: Implementación de null checks y optional chaining para prevenir crashes cuando los datos no están disponibles
+- **Actualización Optimista del Estado**: Los inputs responden inmediatamente mientras se guardan los cambios en segundo plano
+- **Advertencia de Cambios No Guardados**: Alerta del navegador al intentar recargar o cerrar la página con cambios sin guardar
+- **Campos Nullable en Backend**: Soporte para campos opcionales como prerrequisitos, correquisitos y fechas en la base de datos
+- **Corrección de Handlers**: Extracción correcta de IDs de URL en handlers de contenido (Update y Delete)
+- **Seed Data con Hashes Válidos**: Contraseñas con bcrypt correctamente generadas para usuarios de prueba
 
 ## Estructura del Proyecto
 
@@ -205,6 +237,7 @@ El seed data incluye los siguientes usuarios de prueba (contraseña: `password12
 - **Director de Programa**: director@unicartagena.edu.co
 - **Coordinador de Programa**: coordinador@unicartagena.edu.co
 - **Comité Curricular**: comite@unicartagena.edu.co
+- **Comité Académico de Instituto**: comite_academico@unicartagena.edu.co
 - **Decano**: decano@unicartagena.edu.co
 - **Estudiante**: estudiante@unicartagena.edu.co
 - **Admin**: admin@unicartagena.edu.co
