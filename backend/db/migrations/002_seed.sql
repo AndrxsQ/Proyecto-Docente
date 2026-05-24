@@ -18,14 +18,16 @@ INSERT INTO programas_academicos (nombre, modalidad, jornada, plan_estudio, facu
 ('Derecho', 'presencial', 'diurna', 2024, 5);
 
 -- Usuarios (passwords are hashed with bcrypt, default is "password123")
-INSERT INTO usuarios (nombre, apellido, email, password_hash, rol, programa_id, facultad_id) VALUES 
-('Juan', 'Pérez', 'docente@unicartagena.edu.co', '$2a$10$X5wZtZ5Z5Z5Z5Z5Z5Z5Z5u5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5', 'DOCENTE', 1, 1),
-('María', 'García', 'jefe@unicartagena.edu.co', '$2a$10$X5wZtZ5Z5Z5Z5Z5Z5Z5Z5u5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5', 'JEFE_DEPARTAMENTO', 1, 1),
-('Carlos', 'Rodríguez', 'director@unicartagena.edu.co', '$2a$10$X5wZtZ5Z5Z5Z5Z5Z5Z5Z5u5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5', 'DIRECTOR_PROGRAMA', 1, 1),
-('Ana', 'Martínez', 'comite@unicartagena.edu.co', '$2a$10$X5wZtZ5Z5Z5Z5Z5Z5Z5Z5u5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5', 'COMITE_CURRICULAR', NULL, 1),
-('Pedro', 'López', 'decano@unicartagena.edu.co', '$2a$10$X5wZtZ5Z5Z5Z5Z5Z5Z5Z5u5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5', 'DECANO', NULL, 1),
-('Laura', 'Sánchez', 'estudiante@unicartagena.edu.co', '$2a$10$X5wZtZ5Z5Z5Z5Z5Z5Z5Z5u5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5', 'ESTUDIANTE', 1, 1),
-('Admin', 'Sistema', 'admin@unicartagena.edu.co', '$2a$10$X5wZtZ5Z5Z5Z5Z5Z5Z5Z5u5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5', 'ADMIN', NULL, NULL);
+INSERT INTO usuarios (nombre, apellido, email, password_hash, rol, programa_id, facultad_id) VALUES
+('Juan', 'Pérez', 'docente@unicartagena.edu.co', '$2a$10$sQSV1GvhVdEnKecjxHYU6OiPvCBcOOwlLskvJ6ShMkYsG7B5xk1He', 'DOCENTE', 1, 1),
+('María', 'García', 'jefe@unicartagena.edu.co', '$2a$10$sQSV1GvhVdEnKecjxHYU6OiPvCBcOOwlLskvJ6ShMkYsG7B5xk1He', 'JEFE_DEPARTAMENTO', 1, 1),
+('Carlos', 'Rodríguez', 'director@unicartagena.edu.co', '$2a$10$sQSV1GvhVdEnKecjxHYU6OiPvCBcOOwlLskvJ6ShMkYsG7B5xk1He', 'DIRECTOR_PROGRAMA', 1, 1),
+('Roberto', 'Fernández', 'coordinador@unicartagena.edu.co', '$2a$10$sQSV1GvhVdEnKecjxHYU6OiPvCBcOOwlLskvJ6ShMkYsG7B5xk1He', 'COORDINADOR_PROGRAMA', 1, 1),
+('Ana', 'Martínez', 'comite@unicartagena.edu.co', '$2a$10$sQSV1GvhVdEnKecjxHYU6OiPvCBcOOwlLskvJ6ShMkYsG7B5xk1He', 'COMITE_CURRICULAR', NULL, 1),
+('Miguel', 'Torres', 'comite_academico@unicartagena.edu.co', '$2a$10$sQSV1GvhVdEnKecjxHYU6OiPvCBcOOwlLskvJ6ShMkYsG7B5xk1He', 'COMITE_ACADEMICO_INSTITUTO', NULL, 1),
+('Pedro', 'López', 'decano@unicartagena.edu.co', '$2a$10$sQSV1GvhVdEnKecjxHYU6OiPvCBcOOwlLskvJ6ShMkYsG7B5xk1He', 'DECANO', NULL, 1),
+('Laura', 'Sánchez', 'estudiante@unicartagena.edu.co', '$2a$10$sQSV1GvhVdEnKecjxHYU6OiPvCBcOOwlLskvJ6ShMkYsG7B5xk1He', 'ESTUDIANTE', 1, 1),
+('Admin', 'Sistema', 'admin@unicartagena.edu.co', '$2a$10$sQSV1GvhVdEnKecjxHYU6OiPvCBcOOwlLskvJ6ShMkYsG7B5xk1He', 'ADMIN', NULL, NULL);
 
 -- Cursos
 INSERT INTO cursos (nombre, componente, creditos, total_horas, tipo, prerrequisitos, correquisitos, periodo_academico, programa_id, docente_id) VALUES 

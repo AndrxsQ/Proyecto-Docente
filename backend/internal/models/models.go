@@ -5,25 +5,49 @@ import "time"
 type Rol string
 
 const (
-	RolDocente           Rol = "DOCENTE"
-	RolJefeDepartamento  Rol = "JEFE_DEPARTAMENTO"
-	RolDirectorPrograma  Rol = "DIRECTOR_PROGRAMA"
-	RolCoordinadorPrograma Rol = "COORDINADOR_PROGRAMA"
-	RolComiteCurricular  Rol = "COMITE_CURRICULAR"
-	RolDecano            Rol = "DECANO"
-	RolEstudiante        Rol = "ESTUDIANTE"
-	RolAdmin             Rol = "ADMIN"
+	RolDocente                  Rol = "DOCENTE"
+	RolJefeDepartamento         Rol = "JEFE_DEPARTAMENTO"
+	RolDirectorPrograma         Rol = "DIRECTOR_PROGRAMA"
+	RolCoordinadorPrograma      Rol = "COORDINADOR_PROGRAMA"
+	RolComiteCurricular         Rol = "COMITE_CURRICULAR"
+	RolComiteAcademicoInstituto Rol = "COMITE_ACADEMICO_INSTITUTO"
+	RolDecano                   Rol = "DECANO"
+	RolEstudiante               Rol = "ESTUDIANTE"
+	RolAdmin                    Rol = "ADMIN"
 )
+
+type GrupoPermiso string
+
+const (
+	GrupoDocente         GrupoPermiso = "DOCENTE"
+	GrupoRevision        GrupoPermiso = "REVISION"
+	GrupoComite          GrupoPermiso = "COMITE"
+	GrupoAprobacionFinal GrupoPermiso = "APROBACION_FINAL"
+)
+
+func (r Rol) GetGrupo() GrupoPermiso {
+	switch r {
+	case RolDocente:
+		return GrupoDocente
+	case RolJefeDepartamento, RolDirectorPrograma, RolCoordinadorPrograma:
+		return GrupoRevision
+	case RolComiteCurricular, RolComiteAcademicoInstituto:
+		return GrupoComite
+	case RolDecano:
+		return GrupoAprobacionFinal
+	default:
+		return ""
+	}
+}
 
 type EstadoPD string
 
 const (
-	EstadoBorrador           EstadoPD = "BORRADOR"
-	EstadoEnRevisionJefe    EstadoPD = "EN_REVISION_JEFE"
-	EstadoEnRevisionComite  EstadoPD = "EN_REVISION_COMITE"
-	EstadoDevueltoDocente   EstadoPD = "DEVUELTO_DOCENTE"
-	EstadoEnAprobacionDecano EstadoPD = "EN_APROBACION_DECANO"
-	EstadoAprobado          EstadoPD = "APROBADO"
+	EstadoElaborado  EstadoPD = "ELABORADO"
+	EstadoEnRevision EstadoPD = "EN_REVISION"
+	EstadoRevisado   EstadoPD = "REVISADO"
+	EstadoAvalado    EstadoPD = "AVALADO"
+	EstadoAprobado   EstadoPD = "APROBADO"
 )
 
 type EstadoRevision string
@@ -37,7 +61,7 @@ const (
 type TipoBibliografia string
 
 const (
-	TipoBibliografiaBasica       TipoBibliografia = "BASICA"
+	TipoBibliografiaBasica         TipoBibliografia = "BASICA"
 	TipoBibliografiaComplementaria TipoBibliografia = "COMPLEMENTARIA"
 )
 
@@ -52,8 +76,8 @@ const (
 type EstadoSeguimiento string
 
 const (
-	EstadoSeguimientoCumplido    EstadoSeguimiento = "CUMPLIDO"
-	EstadoSeguimientoPendiente   EstadoSeguimiento = "PENDIENTE"
+	EstadoSeguimientoCumplido     EstadoSeguimiento = "CUMPLIDO"
+	EstadoSeguimientoPendiente    EstadoSeguimiento = "PENDIENTE"
 	EstadoSeguimientoReprogramado EstadoSeguimiento = "REPROGRAMADO"
 )
 
@@ -75,9 +99,9 @@ const (
 type TipoCurso string
 
 const (
-	TipoCursoTeorico           TipoCurso = "teórico"
-	TipoCursoPractico          TipoCurso = "práctico"
-	TipoCursoTeoricoPractico   TipoCurso = "teórico-práctico"
+	TipoCursoTeorico         TipoCurso = "teórico"
+	TipoCursoPractico        TipoCurso = "práctico"
+	TipoCursoTeoricoPractico TipoCurso = "teórico-práctico"
 )
 
 type Facultad struct {
@@ -86,115 +110,115 @@ type Facultad struct {
 }
 
 type ProgramaAcademico struct {
-	ID           int       `json:"id"`
-	Nombre       string    `json:"nombre"`
-	Modalidad    Modalidad `json:"modalidad"`
-	Jornada      Jornada   `json:"jornada"`
-	PlanEstudio  int       `json:"planDeEstudio"`
-	FacultadID   int       `json:"facultad_id"`
-	Facultad     *Facultad `json:"facultad,omitempty"`
-}
-
-type Curso struct {
-	ID              int        `json:"id"`
-	Nombre          string     `json:"nombre"`
-	Componente      string     `json:"componente"`
-	Creditos        int        `json:"creditos"`
-	TotalHoras      int        `json:"total_horas"`
-	Tipo            TipoCurso  `json:"tipo"`
-	Prerrequisitos  string     `json:"prerrequisitos"`
-	Correquisitos   string     `json:"correquisitos"`
-	PeriodoAcademico string    `json:"periodo_academico"`
-	ProgramaID      int        `json:"programa_id"`
-	DocenteID       int        `json:"docente_id"`
-	Programa        *ProgramaAcademico `json:"programa,omitempty"`
-	Docente         *Usuario   `json:"docente,omitempty"`
-}
-
-type Usuario struct {
 	ID          int       `json:"id"`
 	Nombre      string    `json:"nombre"`
-	Apellido    string    `json:"apellido"`
-	Email       string    `json:"email"`
-	PasswordHash string   `json:"-"`
-	Rol         Rol       `json:"rol"`
-	ProgramaID  *int      `json:"programa_id,omitempty"`
-	FacultadID  *int      `json:"facultad_id,omitempty"`
-	Programa    *ProgramaAcademico `json:"programa,omitempty"`
+	Modalidad   Modalidad `json:"modalidad"`
+	Jornada     Jornada   `json:"jornada"`
+	PlanEstudio int       `json:"planDeEstudio"`
+	FacultadID  int       `json:"facultad_id"`
 	Facultad    *Facultad `json:"facultad,omitempty"`
 }
 
+type Curso struct {
+	ID               int                `json:"id"`
+	Nombre           string             `json:"nombre"`
+	Componente       string             `json:"componente"`
+	Creditos         int                `json:"creditos"`
+	TotalHoras       int                `json:"total_horas"`
+	Tipo             TipoCurso          `json:"tipo"`
+	Prerrequisitos   *string            `json:"prerrequisitos"`
+	Correquisitos    *string            `json:"correquisitos"`
+	PeriodoAcademico string             `json:"periodo_academico"`
+	ProgramaID       int                `json:"programa_id"`
+	DocenteID        int                `json:"docente_id"`
+	Programa         *ProgramaAcademico `json:"programa,omitempty"`
+	Docente          *Usuario           `json:"docente,omitempty"`
+}
+
+type Usuario struct {
+	ID           int                `json:"id"`
+	Nombre       string             `json:"nombre"`
+	Apellido     string             `json:"apellido"`
+	Email        string             `json:"email"`
+	PasswordHash string             `json:"-"`
+	Rol          Rol                `json:"rol"`
+	ProgramaID   *int               `json:"programa_id,omitempty"`
+	FacultadID   *int               `json:"facultad_id,omitempty"`
+	Programa     *ProgramaAcademico `json:"programa,omitempty"`
+	Facultad     *Facultad          `json:"facultad,omitempty"`
+}
+
 type ProyectoDocente struct {
-	ID                int            `json:"id"`
-	CursoID           int            `json:"curso_id"`
-	Version           int            `json:"version"`
-	Estado            EstadoPD       `json:"estado"`
-	Creacion          time.Time      `json:"creacion"`
-	UltimaModificacion time.Time     `json:"ultima_modificacion"`
-	DocenteID         int            `json:"docente_id"`
-	EstadoJefeDept    EstadoRevision `json:"estado_jefedept"`
-	EstadoDirector    EstadoRevision `json:"estado_director"`
-	EstadoComite      EstadoRevision `json:"estado_comite"`
-	EstadoDecano      EstadoRevision `json:"estado_decano"`
-	Curso             *Curso         `json:"curso,omitempty"`
-	Docente           *Usuario       `json:"docente,omitempty"`
-	Formato           *Formato       `json:"formato,omitempty"`
-	Contenido         []ContenidoCurso `json:"contenido,omitempty"`
-	Bibliografia      []Bibliografia `json:"bibliografia,omitempty"`
-	Seguimiento       []Seguimiento  `json:"seguimiento,omitempty"`
-	Observaciones     []Observacion  `json:"observaciones,omitempty"`
+	ID                 int              `json:"id"`
+	CursoID            int              `json:"curso_id"`
+	Version            int              `json:"version"`
+	Estado             EstadoPD         `json:"estado"`
+	Creacion           time.Time        `json:"creacion"`
+	UltimaModificacion time.Time        `json:"ultima_modificacion"`
+	DocenteID          int              `json:"docente_id"`
+	EstadoJefeDept     EstadoRevision   `json:"estado_jefedept"`
+	EstadoDirector     EstadoRevision   `json:"estado_director"`
+	EstadoComite       EstadoRevision   `json:"estado_comite"`
+	EstadoDecano       EstadoRevision   `json:"estado_decano"`
+	Curso              *Curso           `json:"curso,omitempty"`
+	Docente            *Usuario         `json:"docente,omitempty"`
+	Formato            *Formato         `json:"formato,omitempty"`
+	Contenido          []ContenidoCurso `json:"contenido,omitempty"`
+	Bibliografia       []Bibliografia   `json:"bibliografia,omitempty"`
+	Seguimiento        []Seguimiento    `json:"seguimiento,omitempty"`
+	Observaciones      []Observacion    `json:"observaciones,omitempty"`
 }
 
 type Formato struct {
-	ID                  int    `json:"id"`
-	ProyectoDocenteID   int    `json:"proyecto_docente_id"`
-	Descripcion         string `json:"descripcion"`
+	ID                    int    `json:"id"`
+	ProyectoDocenteID     int    `json:"proyecto_docente_id"`
+	Descripcion           string `json:"descripcion"`
 	ResultadosAprendizaje string `json:"resultados_aprendizaje"`
-	Estrategias         string `json:"estrategias"`
-	EvaluacionResultados string `json:"evaluacion_resultados"`
-	Tipo                string `json:"tipo"`
+	Estrategias           string `json:"estrategias"`
+	EvaluacionResultados  string `json:"evaluacion_resultados"`
+	Tipo                  string `json:"tipo"`
 }
 
 type ContenidoCurso struct {
-	ID           int       `json:"id"`
-	ProyectoDocenteID int `json:"proyecto_docente_id"`
-	Semana       int       `json:"semana"`
-	Tema         string    `json:"tema"`
-	Descripcion  string    `json:"descripcion"`
-	Fecha        time.Time `json:"fecha"`
-	Observaciones string   `json:"observaciones,omitempty"`
+	ID                int     `json:"id"`
+	ProyectoDocenteID int     `json:"proyecto_docente_id"`
+	Semana            int     `json:"semana"`
+	Tema              string  `json:"tema"`
+	Descripcion       string  `json:"descripcion"`
+	Fecha             *string `json:"fecha"`
+	Observaciones     string  `json:"observaciones,omitempty"`
 }
 
 type Seguimiento struct {
-	ID                int       `json:"id"`
-	ProyectoDocenteID int       `json:"proyecto_docente_id"`
-	CursoID           int       `json:"curso_id"`
-	DocenteID         int       `json:"docente_id"`
-	Fecha             time.Time `json:"fecha"`
-	Desarrollo        string    `json:"desarrollo"`
-	Descripcion       string    `json:"descripcion"`
-	PorcentajeAvance  int       `json:"porcentaje_avance"`
+	ID                int               `json:"id"`
+	ProyectoDocenteID int               `json:"proyecto_docente_id"`
+	CursoID           int               `json:"curso_id"`
+	DocenteID         int               `json:"docente_id"`
+	Fecha             time.Time         `json:"fecha"`
+	Desarrollo        string            `json:"desarrollo"`
+	Descripcion       string            `json:"descripcion"`
+	PorcentajeAvance  int               `json:"porcentaje_avance"`
 	Estado            EstadoSeguimiento `json:"estado"`
-	Reporte           string    `json:"reporte,omitempty"`
-	Observaciones     string    `json:"observaciones,omitempty"`
+	Reporte           string            `json:"reporte,omitempty"`
+	Observaciones     string            `json:"observaciones,omitempty"`
 }
 
 type Observacion struct {
-	ID                int            `json:"id"`
-	ProyectoDocenteID int            `json:"proyecto_docente_id"`
-	AutorID           int            `json:"autor_id"`
+	ID                int             `json:"id"`
+	ProyectoDocenteID int             `json:"proyecto_docente_id"`
+	AutorID           int             `json:"autor_id"`
 	Tipo              TipoObservacion `json:"tipo"`
-	Descripcion       string         `json:"descripcion"`
-	Fecha             time.Time      `json:"fecha"`
-	Autor             *Usuario       `json:"autor,omitempty"`
+	Descripcion       string          `json:"descripcion"`
+	Fecha             time.Time       `json:"fecha"`
+	Autor             *Usuario        `json:"autor,omitempty"`
 }
 
 type Bibliografia struct {
-	ID                int             `json:"id"`
-	ProyectoDocenteID int             `json:"proyecto_docente_id"`
-	Referencia        string          `json:"referencia"`
+	ID                int              `json:"id"`
+	ProyectoDocenteID int              `json:"proyecto_docente_id"`
+	Referencia        string           `json:"referencia"`
 	Tipo              TipoBibliografia `json:"tipo"`
-	URL               *string         `json:"url,omitempty"`
+	URL               *string          `json:"url,omitempty"`
 }
 
 type LoginRequest struct {
@@ -203,7 +227,7 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token   string  `json:"token"`
 	Usuario Usuario `json:"usuario"`
 }
 

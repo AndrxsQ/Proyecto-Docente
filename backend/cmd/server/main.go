@@ -108,7 +108,6 @@ func main() {
 	r.HandleFunc("/api/proyectos-docentes", authMiddleware.Authenticate(pdHandler.Create)).Methods("POST")
 	r.HandleFunc("/api/proyectos-docentes/{id}/enviar", authMiddleware.Authenticate(pdHandler.Enviar)).Methods("POST")
 	r.HandleFunc("/api/proyectos-docentes/{id}/aprobar", authMiddleware.Authenticate(pdHandler.Aprobar)).Methods("POST")
-	r.HandleFunc("/api/proyectos-docentes/{id}/devolver", authMiddleware.Authenticate(pdHandler.Devolver)).Methods("POST")
 
 	r.HandleFunc("/api/proyectos-docentes/{id}/formato", authMiddleware.Authenticate(formatoHandler.GetByProyectoDocenteID)).Methods("GET")
 	r.HandleFunc("/api/proyectos-docentes/{id}/formato", authMiddleware.Authenticate(formatoHandler.CreateOrUpdate)).Methods("POST", "PUT")
@@ -127,13 +126,27 @@ func main() {
 	r.HandleFunc("/api/proyectos-docentes/{id}/seguimiento", authMiddleware.Authenticate(seguimientoHandler.Create)).Methods("POST")
 	r.HandleFunc("/api/proyectos-docentes/{id}/seguimiento/{seg_id}", authMiddleware.Authenticate(seguimientoHandler.Update)).Methods("PUT")
 
-	cors := gorillaHandlers.CORS(gorillaHandlers.AllowedOrigins([]string{"http://localhost:5173", "http://localhost:3000"}))
-	handler := cors(r)
+	handler := corsMiddleware(r)
 
 	log.Printf("Server starting on port %s...", serverPort)
 	if err := http.ListenAndServe(":"+serverPort, handler); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func getEnv(key, defaultValue string) string {

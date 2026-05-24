@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -18,6 +19,7 @@ func NewCursoHandler(cursoService *service.CursoService) *CursoHandler {
 }
 
 func (h *CursoHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	log.Printf("GetAll called with method: %s", r.Method)
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -33,13 +35,16 @@ func (h *CursoHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	if docenteID := r.URL.Query().Get("docente_id"); docenteID != "" {
 		filters["docente_id"] = docenteID
 	}
+	log.Printf("Filters: %v", filters)
 
 	cursos, err := h.cursoService.GetAll(filters)
 	if err != nil {
+		log.Printf("Error getting cursos: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	log.Printf("Found %d cursos", len(cursos))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cursos)
 }

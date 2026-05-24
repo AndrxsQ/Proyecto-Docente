@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"proyecto-docente/internal/models"
+	"strconv"
 )
 
 type CursoRepository struct {
@@ -29,19 +30,19 @@ func (r *CursoRepository) GetAll(filters map[string]interface{}) ([]models.Curso
 	argIndex := 1
 
 	if programaID, ok := filters["programa_id"]; ok {
-		query += " AND c.programa_id = $" + string(rune('0'+argIndex))
+		query += " AND c.programa_id = $" + strconv.Itoa(argIndex)
 		args = append(args, programaID)
 		argIndex++
 	}
 
 	if periodo, ok := filters["periodo"]; ok {
-		query += " AND c.periodo_academico = $" + string(rune('0'+argIndex))
+		query += " AND c.periodo_academico = $" + strconv.Itoa(argIndex)
 		args = append(args, periodo)
 		argIndex++
 	}
 
 	if docenteID, ok := filters["docente_id"]; ok {
-		query += " AND c.docente_id = $" + string(rune('0'+argIndex))
+		query += " AND c.docente_id = $" + strconv.Itoa(argIndex)
 		args = append(args, docenteID)
 		argIndex++
 	}
@@ -59,14 +60,22 @@ func (r *CursoRepository) GetAll(filters map[string]interface{}) ([]models.Curso
 		var c models.Curso
 		var programaNombre, programaModalidad, programaJornada sql.NullString
 		var docenteNombre, docenteApellido sql.NullString
+		var prerequisitos, correquisitos sql.NullString
 		if err := rows.Scan(
 			&c.ID, &c.Nombre, &c.Componente, &c.Creditos, &c.TotalHoras, &c.Tipo,
-			&c.Prerrequisitos, &c.Correquisitos, &c.PeriodoAcademico,
+			&prerequisitos, &correquisitos, &c.PeriodoAcademico,
 			&c.ProgramaID, &c.DocenteID,
 			&programaNombre, &programaModalidad, &programaJornada,
 			&docenteNombre, &docenteApellido,
 		); err != nil {
 			return nil, err
+		}
+
+		if prerequisitos.Valid {
+			c.Prerrequisitos = &prerequisitos.String
+		}
+		if correquisitos.Valid {
+			c.Correquisitos = &correquisitos.String
 		}
 
 		if programaNombre.Valid {
@@ -109,13 +118,21 @@ func (r *CursoRepository) GetByID(id int) (*models.Curso, error) {
 	var c models.Curso
 	var programaNombre, programaModalidad, programaJornada sql.NullString
 	var docenteNombre, docenteApellido sql.NullString
+	var prerequisitos, correquisitos sql.NullString
 	err := row.Scan(
 		&c.ID, &c.Nombre, &c.Componente, &c.Creditos, &c.TotalHoras, &c.Tipo,
-		&c.Prerrequisitos, &c.Correquisitos, &c.PeriodoAcademico,
+		&prerequisitos, &correquisitos, &c.PeriodoAcademico,
 		&c.ProgramaID, &c.DocenteID,
 		&programaNombre, &programaModalidad, &programaJornada,
 		&docenteNombre, &docenteApellido,
 	)
+
+	if prerequisitos.Valid {
+		c.Prerrequisitos = &prerequisitos.String
+	}
+	if correquisitos.Valid {
+		c.Correquisitos = &correquisitos.String
+	}
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -148,8 +165,16 @@ func (r *CursoRepository) Create(curso *models.Curso) error {
 		INSERT INTO cursos (nombre, componente, creditos, total_horas, tipo, prerrequisitos, correquisitos, periodo_academico, programa_id, docente_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
 	`
+	prerequisitosVal := ""
+	if curso.Prerrequisitos != nil {
+		prerequisitosVal = *curso.Prerrequisitos
+	}
+	correquisitosVal := ""
+	if curso.Correquisitos != nil {
+		correquisitosVal = *curso.Correquisitos
+	}
 	return r.db.QueryRow(query, curso.Nombre, curso.Componente, curso.Creditos,
-		curso.TotalHoras, curso.Tipo, curso.Prerrequisitos, curso.Correquisitos,
+		curso.TotalHoras, curso.Tipo, prerequisitosVal, correquisitosVal,
 		curso.PeriodoAcademico, curso.ProgramaID, curso.DocenteID).Scan(&curso.ID)
 }
 
@@ -161,8 +186,16 @@ func (r *CursoRepository) Update(curso *models.Curso) error {
 		    programa_id = $9, docente_id = $10
 		WHERE id = $11
 	`
+	prerequisitosVal := ""
+	if curso.Prerrequisitos != nil {
+		prerequisitosVal = *curso.Prerrequisitos
+	}
+	correquisitosVal := ""
+	if curso.Correquisitos != nil {
+		correquisitosVal = *curso.Correquisitos
+	}
 	_, err := r.db.Exec(query, curso.Nombre, curso.Componente, curso.Creditos,
-		curso.TotalHoras, curso.Tipo, curso.Prerrequisitos, curso.Correquisitos,
+		curso.TotalHoras, curso.Tipo, prerequisitosVal, correquisitosVal,
 		curso.PeriodoAcademico, curso.ProgramaID, curso.DocenteID, curso.ID)
 	return err
 }

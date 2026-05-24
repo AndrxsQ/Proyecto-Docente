@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -107,7 +108,10 @@ func (h *ProyectoDocenteHandler) Enviar(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	fmt.Printf("DEBUG: Enviar - ID: %d\n", id)
+
 	if err := h.pdService.Enviar(id); err != nil {
+		fmt.Printf("DEBUG: Error in Enviar: %v\n", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -137,41 +141,14 @@ func (h *ProyectoDocenteHandler) Aprobar(w http.ResponseWriter, r *http.Request)
 	userRol := auth.GetUserRol(r)
 	userID := auth.GetUserID(r)
 
+	fmt.Printf("DEBUG: Aprobar - ID: %d, Rol: %s, UserID: %d\n", id, userRol, userID)
+
 	if err := h.pdService.Aprobar(id, userRol, userID, req.Observacion); err != nil {
+		fmt.Printf("DEBUG: Error in Aprobar: %v\n", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Proyecto aprobado"})
-}
-
-func (h *ProyectoDocenteHandler) Devolver(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	id, err := strconv.Atoi(r.URL.Path[len("/api/proyectos-docentes/") : len(r.URL.Path)-len("/devolver")])
-	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
-	}
-
-	var req models.DevolverRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-
-	userRol := auth.GetUserRol(r)
-	userID := auth.GetUserID(r)
-
-	if err := h.pdService.Devolver(id, userRol, userID, req.Observacion); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Proyecto devuelto"})
 }

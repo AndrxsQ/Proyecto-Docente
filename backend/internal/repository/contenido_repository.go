@@ -29,7 +29,7 @@ func (r *ContenidoRepository) GetByProyectoDocenteID(pdID int) ([]models.Conteni
 	var contenidos []models.ContenidoCurso
 	for rows.Next() {
 		var c models.ContenidoCurso
-		var fecha sql.NullTime
+		var fecha sql.NullString
 		var observaciones sql.NullString
 		if err := rows.Scan(
 			&c.ID, &c.ProyectoDocenteID, &c.Semana, &c.Tema, &c.Descripcion,
@@ -39,7 +39,7 @@ func (r *ContenidoRepository) GetByProyectoDocenteID(pdID int) ([]models.Conteni
 		}
 
 		if fecha.Valid {
-			c.Fecha = fecha.Time
+			c.Fecha = &fecha.String
 		}
 		if observaciones.Valid {
 			c.Observaciones = observaciones.String
@@ -60,7 +60,7 @@ func (r *ContenidoRepository) GetByID(id int) (*models.ContenidoCurso, error) {
 	row := r.db.QueryRow(query, id)
 
 	var c models.ContenidoCurso
-	var fecha sql.NullTime
+	var fecha sql.NullString
 	var observaciones sql.NullString
 	err := row.Scan(
 		&c.ID, &c.ProyectoDocenteID, &c.Semana, &c.Tema, &c.Descripcion,
@@ -74,7 +74,7 @@ func (r *ContenidoRepository) GetByID(id int) (*models.ContenidoCurso, error) {
 	}
 
 	if fecha.Valid {
-		c.Fecha = fecha.Time
+		c.Fecha = &fecha.String
 	}
 	if observaciones.Valid {
 		c.Observaciones = observaciones.String
@@ -88,8 +88,14 @@ func (r *ContenidoRepository) Create(contenido *models.ContenidoCurso) error {
 		INSERT INTO contenido_curso (proyecto_docente_id, semana, tema, descripcion, fecha, observaciones)
 		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
 	`
+	var fechaValue interface{}
+	if contenido.Fecha != nil {
+		fechaValue = *contenido.Fecha
+	} else {
+		fechaValue = nil
+	}
 	return r.db.QueryRow(query, contenido.ProyectoDocenteID, contenido.Semana,
-		contenido.Tema, contenido.Descripcion, contenido.Fecha, contenido.Observaciones).Scan(&contenido.ID)
+		contenido.Tema, contenido.Descripcion, fechaValue, contenido.Observaciones).Scan(&contenido.ID)
 }
 
 func (r *ContenidoRepository) Update(contenido *models.ContenidoCurso) error {
@@ -98,8 +104,14 @@ func (r *ContenidoRepository) Update(contenido *models.ContenidoCurso) error {
 		SET semana = $1, tema = $2, descripcion = $3, fecha = $4, observaciones = $5
 		WHERE id = $6
 	`
+	var fechaValue interface{}
+	if contenido.Fecha != nil {
+		fechaValue = *contenido.Fecha
+	} else {
+		fechaValue = nil
+	}
 	_, err := r.db.Exec(query, contenido.Semana, contenido.Tema, contenido.Descripcion,
-		contenido.Fecha, contenido.Observaciones, contenido.ID)
+		fechaValue, contenido.Observaciones, contenido.ID)
 	return err
 }
 

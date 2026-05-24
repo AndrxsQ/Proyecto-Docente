@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"proyecto-docente/internal/models"
 	"proyecto-docente/internal/service"
@@ -66,7 +67,12 @@ func (h *ContenidoHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.Atoi(r.URL.Path[len("/api/proyectos-docentes/"):len(r.URL.Path)-len("/contenido/")])
+	pathParts := strings.Split(r.URL.Path, "/")
+	if len(pathParts) < 6 {
+		http.Error(w, "Invalid URL path", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.Atoi(pathParts[5])
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
@@ -94,7 +100,12 @@ func (h *ContenidoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.Atoi(r.URL.Path[len("/api/proyectos-docentes/"):len(r.URL.Path)-len("/contenido/")])
+	pathParts := strings.Split(r.URL.Path, "/")
+	if len(pathParts) < 6 {
+		http.Error(w, "Invalid URL path", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.Atoi(pathParts[5])
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
