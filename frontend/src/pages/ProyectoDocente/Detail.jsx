@@ -23,6 +23,7 @@ const ProyectoDocenteDetail = () => {
       setSeguimiento(seguimientoData);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setSeguimiento([]);
     } finally {
       setLoading(false);
     }
@@ -30,9 +31,9 @@ const ProyectoDocenteDetail = () => {
 
   if (loading) return <div className="p-8">Cargando...</div>;
 
-  const avanceTotal = seguimiento.reduce((acc, seg) => {
+  const avanceTotal = seguimiento?.reduce((acc, seg) => {
     return acc + (seg.estado === 'CUMPLIDO' ? seg.porcentaje_avance : 0);
-  }, 0);
+  }, 0) || 0;
 
   return (
     <div className="p-8">

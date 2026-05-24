@@ -15,6 +15,7 @@ const Login = () => {
     setError('');
     try {
       await login(email, password);
+      console.log('Login successful');
       navigate('/dashboard');
     } catch (err) {
       setError('Credenciales inválidas');

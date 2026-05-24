@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getProyectosDocentes, createProyectoDocente } from '../../api/proyectosDocente';
+import { getProyectosDocentes, createProyectoDocente, aprobarProyectoDocente, enviarProyectoDocente } from '../../api/proyectosDocente';
 import { getCursos } from '../../api/cursos';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Eye, Edit } from 'lucide-react';
+import { Plus, Eye, Edit, Check, Send } from 'lucide-react';
 
 const ProyectoDocenteList = () => {
   const [proyectos, setProyectos] = useState([]);
@@ -32,6 +32,8 @@ const ProyectoDocenteList = () => {
       setCursos(cursosData);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setProyectos([]);
+      setCursos([]);
     } finally {
       setLoading(false);
     }
@@ -48,13 +50,68 @@ const ProyectoDocenteList = () => {
     }
   };
 
+  const handleAprobar = async (proyectoId) => {
+    try {
+      await aprobarProyectoDocente(proyectoId, '');
+      fetchData();
+    } catch (error) {
+      console.error('Error approving proyecto:', error);
+      alert('Error al aprobar el proyecto');
+    }
+  };
+
+  const handleEnviar = async (proyectoId) => {
+    try {
+      await enviarProyectoDocente(proyectoId);
+      fetchData();
+    } catch (error) {
+      console.error('Error sending proyecto:', error);
+      alert('Error al enviar el proyecto');
+    }
+  };
+
+  const getPermissionGroup = (rol) => {
+    const groups = {
+      'DOCENTE': 'DOCENTE',
+      'JEFE_DEPARTAMENTO': 'REVISION',
+      'DIRECTOR_PROGRAMA': 'REVISION',
+      'COORDINADOR_PROGRAMA': 'REVISION',
+      'COMITE_CURRICULAR': 'COMITE',
+      'COMITE_ACADEMICO_INSTITUTO': 'COMITE',
+      'DECANO': 'APROBACION_FINAL',
+    };
+    return groups[rol] || '';
+  };
+
+  const canAprobar = (proyecto) => {
+    const grupo = getPermissionGroup(user.rol);
+    switch (grupo) {
+      case 'REVISION':
+        return proyecto.estado === 'EN_REVISION';
+      case 'COMITE':
+        return proyecto.estado === 'REVISADO';
+      case 'APROBACION_FINAL':
+        return proyecto.estado === 'AVALADO';
+      default:
+        return false;
+    }
+  };
+
+  const getNextEstado = (estado) => {
+    const nextStates = {
+      'EN_REVISION': 'REVISADO',
+      'REVISADO': 'AVALADO',
+      'AVALADO': 'APROBADO',
+    };
+    return nextStates[estado];
+  };
+
   const getEstadoBadge = (estado) => {
     const badges = {
-      'BORRADOR': 'bg-gray-100 text-gray-800',
-      'EN_REVISION_JEFE': 'bg-yellow-100 text-yellow-800',
-      'EN_REVISION_COMITE': 'bg-yellow-100 text-yellow-800',
-      'EN_APROBACION_DECANO': 'bg-yellow-100 text-yellow-800',
-      'DEVUELTO_DOCENTE': 'bg-red-100 text-red-800',
+      'ELABORADO': 'bg-gray-100 text-gray-800',
+      'EN_REVISION': 'bg-blue-100 text-blue-800',
+      'REVISADO': 'bg-indigo-100 text-indigo-800',
+      'AVALADO': 'bg-yellow-100 text-yellow-800',
       'APROBADO': 'bg-green-100 text-green-800',
     };
     return badges[estado] || 'bg-gray-100 text-gray-800';
@@ -90,38 +147,64 @@ const ProyectoDocenteList = () => {
               </tr>
             </thead>
             <tbody>
-              {proyectos.map((proyecto) => (
-                <tr key={proyecto.id} className="border-b hover:bg-gray-50">
-                  <td className="p-4">{proyecto.curso?.nombre}</td>
-                  <td className="p-4">{proyecto.version}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getEstadoBadge(proyecto.estado)}`}>
-                      {proyecto.estado.replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                  <td className="p-4">{new Date(proyecto.ultima_modificacion).toLocaleDateString()}</td>
-                  <td className="p-4">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => navigate(`/proyectos-docente/${proyecto.id}`)}
-                        className="p-2 hover:bg-gray-100 rounded"
-                        title="Ver"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      {(user.rol === 'DOCENTE' || user.rol === 'ADMIN') && (
-                        <button
-                          onClick={() => navigate(`/proyectos-docente/${proyecto.id}/edit`)}
-                          className="p-2 hover:bg-gray-100 rounded"
-                          title="Editar"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
+              {!proyectos || proyectos.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="p-4 text-center text-gray-500">
+                    No hay proyectos para mostrar
                   </td>
                 </tr>
-              ))}
+              ) : (
+                proyectos.map((proyecto) => (
+                  <tr key={proyecto.id} className="border-b hover:bg-gray-50">
+                    <td className="p-4">{proyecto.curso?.nombre}</td>
+                    <td className="p-4">{proyecto.version}</td>
+                    <td className="p-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getEstadoBadge(proyecto.estado)}`}>
+                        {proyecto.estado.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="p-4">{new Date(proyecto.ultima_modificacion).toLocaleDateString()}</td>
+                    <td className="p-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => navigate(`/proyectos-docente/${proyecto.id}`)}
+                          className="p-2 hover:bg-gray-100 rounded"
+                          title="Ver"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        {(user.rol === 'DOCENTE' || user.rol === 'ADMIN') && (
+                          <button
+                            onClick={() => navigate(`/proyectos-docente/${proyecto.id}/edit`)}
+                            className="p-2 hover:bg-gray-100 rounded"
+                            title="Editar"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        )}
+                        {user.rol === 'DOCENTE' && proyecto.estado === 'ELABORADO' && (
+                          <button
+                            onClick={() => handleEnviar(proyecto.id)}
+                            className="p-2 hover:bg-blue-100 rounded text-blue-600"
+                            title="Enviar a revisión"
+                          >
+                            <Send className="w-4 h-4" />
+                          </button>
+                        )}
+                        {canAprobar(proyecto) && (
+                          <button
+                            onClick={() => handleAprobar(proyecto.id)}
+                            className="p-2 hover:bg-green-100 rounded text-green-600"
+                            title={`Aprobar - Pasar a ${getNextEstado(proyecto.estado).replace(/_/g, ' ')}`}
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

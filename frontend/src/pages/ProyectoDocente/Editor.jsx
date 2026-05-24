@@ -22,6 +22,19 @@ const ProyectoDocenteEditor = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      const hasChanges = formato.descripcion || formato.resultados_aprendizaje || formato.estrategias || formato.evaluacion_resultados;
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [formato]);
+
   const fetchData = async () => {
     try {
       const [proyectoData, formatoData, contenidoData, bibliografiaData] = await Promise.all([
@@ -36,6 +49,8 @@ const ProyectoDocenteEditor = () => {
       setBibliografia(bibliografiaData);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setContenido([]);
+      setBibliografia([]);
     } finally {
       setLoading(false);
     }
@@ -54,21 +69,23 @@ const ProyectoDocenteEditor = () => {
   };
 
   const handleAddContenido = async () => {
-    const newSemana = contenido.length + 1;
+    const newSemana = (contenido?.length || 0) + 1;
+    const newItem = {
+      semana: newSemana,
+      tema: '',
+      descripcion: '',
+      fecha: new Date().toISOString().split('T')[0]
+    };
     try {
-      await createContenido(proyecto.id, {
-        semana: newSemana,
-        tema: '',
-        descripcion: '',
-        fecha: new Date().toISOString().split('T')[0]
-      });
-      fetchData();
+      const response = await createContenido(proyecto.id, newItem);
+      setContenido([...contenido, { ...newItem, id: response.id }]);
     } catch (error) {
       console.error('Error adding contenido:', error);
     }
   };
 
   const handleUpdateContenido = async (item) => {
+    setContenido(contenido.map(c => c.id === item.id ? item : c));
     try {
       await updateContenido(proyecto.id, item.id, item);
     } catch (error) {
@@ -79,7 +96,7 @@ const ProyectoDocenteEditor = () => {
   const handleDeleteContenido = async (itemId) => {
     try {
       await deleteContenido(proyecto.id, itemId);
-      fetchData();
+      setContenido(contenido.filter(c => c.id !== itemId));
     } catch (error) {
       console.error('Error deleting contenido:', error);
     }
@@ -87,17 +104,18 @@ const ProyectoDocenteEditor = () => {
 
   const handleAddBibliografia = async () => {
     try {
-      await createBibliografia(proyecto.id, {
+      const newBibliografia = await createBibliografia(proyecto.id, {
         referencia: '',
         tipo: 'BASICA'
       });
-      fetchData();
+      setBibliografia([...(bibliografia || []), newBibliografia]);
     } catch (error) {
       console.error('Error adding bibliografia:', error);
     }
   };
 
   const handleUpdateBibliografia = async (item) => {
+    setBibliografia(bibliografia.map(b => b.id === item.id ? item : b));
     try {
       await updateBibliografia(proyecto.id, item.id, item);
     } catch (error) {
@@ -108,7 +126,7 @@ const ProyectoDocenteEditor = () => {
   const handleDeleteBibliografia = async (itemId) => {
     try {
       await deleteBibliografia(proyecto.id, itemId);
-      fetchData();
+      setBibliografia(bibliografia.filter(item => item.id !== itemId));
     } catch (error) {
       console.error('Error deleting bibliografia:', error);
     }
@@ -215,35 +233,39 @@ const ProyectoDocenteEditor = () => {
               </button>
             </div>
             <div className="space-y-4">
-              {contenido.map((item) => (
-                <div key={item.id} className="border p-4 rounded-md">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="font-medium">Semana {item.semana}</span>
-                    <button onClick={() => handleDeleteContenido(item.id)} className="text-red-600 hover:text-red-700">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+              {!contenido || contenido.length === 0 ? (
+                <p className="text-gray-500">No hay contenido para mostrar</p>
+              ) : (
+                contenido.map((item) => (
+                  <div key={item.id} className="border p-4 rounded-md">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-medium">Semana {item.semana}</span>
+                      <button onClick={() => handleDeleteContenido(item.id)} className="text-red-600 hover:text-red-700">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      value={item.tema}
+                      onChange={(e) => handleUpdateContenido({ ...item, tema: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-md mb-2"
+                      placeholder="Tema"
+                    />
+                    <textarea
+                      value={item.descripcion}
+                      onChange={(e) => handleUpdateContenido({ ...item, descripcion: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-md h-20"
+                      placeholder="Descripción"
+                    />
+                    <input
+                      type="date"
+                      value={item.fecha ? item.fecha.split('T')[0] : ''}
+                      onChange={(e) => handleUpdateContenido({ ...item, fecha: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-md mt-2"
+                    />
                   </div>
-                  <input
-                    type="text"
-                    value={item.tema}
-                    onChange={(e) => handleUpdateContenido({ ...item, tema: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md mb-2"
-                    placeholder="Tema"
-                  />
-                  <textarea
-                    value={item.descripcion}
-                    onChange={(e) => handleUpdateContenido({ ...item, descripcion: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md h-20"
-                    placeholder="Descripción"
-                  />
-                  <input
-                    type="date"
-                    value={item.fecha ? item.fecha.split('T')[0] : ''}
-                    onChange={(e) => handleUpdateContenido({ ...item, fecha: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md mt-2"
-                  />
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         )}
@@ -270,29 +292,33 @@ const ProyectoDocenteEditor = () => {
               </button>
             </div>
             <div className="space-y-4">
-              {bibliografia.map((item) => (
-                <div key={item.id} className="border p-4 rounded-md">
-                  <div className="flex justify-between items-start mb-2">
-                    <select
-                      value={item.tipo}
-                      onChange={(e) => handleUpdateBibliografia({ ...item, tipo: e.target.value })}
-                      className="px-3 py-1 border rounded-md text-sm"
-                    >
-                      <option value="BASICA">Básica</option>
-                      <option value="COMPLEMENTARIA">Complementaria</option>
-                    </select>
-                    <button onClick={() => handleDeleteBibliografia(item.id)} className="text-red-600 hover:text-red-700">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+              {!bibliografia || bibliografia.length === 0 ? (
+                <p className="text-gray-500">No hay bibliografía para mostrar</p>
+              ) : (
+                bibliografia.map((item) => (
+                  <div key={item.id} className="border p-4 rounded-md">
+                    <div className="flex justify-between items-start mb-2">
+                      <select
+                        value={item.tipo}
+                        onChange={(e) => handleUpdateBibliografia({ ...item, tipo: e.target.value })}
+                        className="px-3 py-1 border rounded-md text-sm"
+                      >
+                        <option value="BASICA">Básica</option>
+                        <option value="COMPLEMENTARIA">Complementaria</option>
+                      </select>
+                      <button onClick={() => handleDeleteBibliografia(item.id)} className="text-red-600 hover:text-red-700">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <textarea
+                      value={item.referencia}
+                      onChange={(e) => handleUpdateBibliografia({ ...item, referencia: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-md h-20"
+                      placeholder="Referencia bibliográfica completa"
+                    />
                   </div>
-                  <textarea
-                    value={item.referencia}
-                    onChange={(e) => handleUpdateBibliografia({ ...item, referencia: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md h-20"
-                    placeholder="Referencia bibliográfica completa"
-                  />
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         )}

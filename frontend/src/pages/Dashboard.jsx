@@ -34,6 +34,8 @@ const Dashboard = () => {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+        setProyectos([]);
+        setCursos([]);
       } finally {
         setLoading(false);
       }
@@ -82,7 +84,7 @@ const Dashboard = () => {
           <div className="flex items-center">
             <FileText className="w-8 h-8 text-blue-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{proyectos.length}</p>
+              <p className="text-2xl font-bold">{proyectos?.length || 0}</p>
               <p className="text-gray-600">Proyectos</p>
             </div>
           </div>
@@ -91,7 +93,7 @@ const Dashboard = () => {
           <div className="flex items-center">
             <Clock className="w-8 h-8 text-yellow-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{proyectos.filter(p => p.estado.includes('REVISION')).length}</p>
+              <p className="text-2xl font-bold">{proyectos?.filter(p => p.estado?.includes('REVISION')).length || 0}</p>
               <p className="text-gray-600">En Revisión</p>
             </div>
           </div>
@@ -100,7 +102,7 @@ const Dashboard = () => {
           <div className="flex items-center">
             <CheckCircle className="w-8 h-8 text-green-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{proyectos.filter(p => p.estado === 'APROBADO').length}</p>
+              <p className="text-2xl font-bold">{proyectos?.filter(p => p.estado === 'APROBADO').length || 0}</p>
               <p className="text-gray-600">Aprobados</p>
             </div>
           </div>
@@ -109,7 +111,7 @@ const Dashboard = () => {
           <div className="flex items-center">
             <AlertCircle className="w-8 h-8 text-red-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{proyectos.filter(p => p.estado === 'DEVUELTO_DOCENTE').length}</p>
+              <p className="text-2xl font-bold">{proyectos?.filter(p => p.estado === 'DEVUELTO_DOCENTE').length || 0}</p>
               <p className="text-gray-600">Devueltos</p>
             </div>
           </div>
@@ -121,7 +123,7 @@ const Dashboard = () => {
           <h2 className="text-xl font-semibold">Proyectos Recientes</h2>
         </div>
         <div className="p-6">
-          {proyectos.length === 0 ? (
+          {!proyectos || proyectos.length === 0 ? (
             <p className="text-gray-500">No hay proyectos para mostrar</p>
           ) : (
             <div className="overflow-x-auto">

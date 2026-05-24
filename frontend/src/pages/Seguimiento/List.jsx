@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getProyectosDocente } from '../../api/proyectosDocente';
+import { getProyectosDocentes } from '../../api/proyectosDocente';
 import { getCursos } from '../../api/cursos';
 import { useAuth } from '../../context/AuthContext';
 import { Plus } from 'lucide-react';
@@ -23,13 +23,15 @@ const SeguimientoList = () => {
         filters.docente_id = user.id;
       }
       const [proyectosData, cursosData] = await Promise.all([
-        getProyectosDocente(filters),
+        getProyectosDocentes(filters),
         getCursos(user.rol === 'DOCENTE' ? { docente_id: user.id } : {})
       ]);
       setProyectos(proyectosData);
       setCursos(cursosData);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setProyectos([]);
+      setCursos([]);
     }
   };
 
@@ -56,7 +58,7 @@ const SeguimientoList = () => {
               className="w-full px-3 py-2 border rounded-md"
             >
               <option value="">Seleccionar curso</option>
-              {cursos.map((curso) => (
+              {cursos?.map((curso) => (
                 <option key={curso.id} value={curso.id}>
                   {curso.nombre}
                 </option>
@@ -86,21 +88,29 @@ const SeguimientoList = () => {
               </tr>
             </thead>
             <tbody>
-              {proyectos.map((proyecto) => (
-                <tr key={proyecto.id} className="border-b hover:bg-gray-50">
-                  <td className="p-4">{proyecto.curso?.nombre}</td>
-                  <td className="p-4">{proyecto.version}</td>
-                  <td className="p-4">{proyecto.docente?.nombre} {proyecto.docente?.apellido}</td>
-                  <td className="p-4">
-                    <button
-                      onClick={() => navigate(`/seguimiento/${proyecto.id}`)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      Ver Seguimiento
-                    </button>
+              {!proyectos || proyectos.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="p-4 text-center text-gray-500">
+                    No hay proyectos para mostrar
                   </td>
                 </tr>
-              ))}
+              ) : (
+                proyectos.map((proyecto) => (
+                  <tr key={proyecto.id} className="border-b hover:bg-gray-50">
+                    <td className="p-4">{proyecto.curso?.nombre}</td>
+                    <td className="p-4">{proyecto.version}</td>
+                    <td className="p-4">{proyecto.docente?.nombre} {proyecto.docente?.apellido}</td>
+                    <td className="p-4">
+                      <button
+                        onClick={() => navigate(`/seguimiento/${proyecto.id}`)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Ver Seguimiento
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
