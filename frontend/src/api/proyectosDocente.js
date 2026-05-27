@@ -105,10 +105,7 @@ export const getSeguimiento = async (proyectoDocenteId) => {
 };
 
 export const createSeguimiento = async (proyectoDocenteId, data) => {
-  const response = await api.post(`/proyectos-docentes/${proyectoDocenteId}/seguimiento`, {
-    ...data,
-    proyecto_docente_id: proyectoDocenteId
-  });
+  const response = await api.post(`/proyectos-docentes/${proyectoDocenteId}/seguimiento`, data);
   return response.data;
 };
 

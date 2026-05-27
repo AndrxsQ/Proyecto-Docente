@@ -111,7 +111,7 @@ const AdminProgramas = () => {
             </thead>
             <tbody>
               {programas.map((programa, index) => (
-                <tr key={programa.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'}`}>
+                <tr key={programa.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ` + (index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]')}>
                   <td className="py-3 px-4 text-sm text-[#4A4A4A]">{programa.nombre}</td>
                   <td className="py-3 px-4 text-sm text-[#4A4A4A]">{programa.modalidad}</td>
                   <td className="py-3 px-4 text-sm text-[#4A4A4A]">{programa.jornada}</td>

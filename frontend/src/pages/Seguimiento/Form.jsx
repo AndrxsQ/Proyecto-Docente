@@ -24,14 +24,20 @@ const SeguimientoForm = () => {
 
   const fetchData = async () => {
     try {
+      console.log('Fetching data for proyecto id:', id);
       const [proyectoData, seguimientoData] = await Promise.all([
         getProyectoDocente(id),
         getSeguimiento(id)
       ]);
+      console.log('Proyecto data:', proyectoData);
+      console.log('Seguimiento data:', seguimientoData);
       setProyecto(proyectoData);
-      setSeguimiento(seguimientoData);
+      setSeguimiento(seguimientoData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      setProyecto(null);
+      setSeguimiento([]);
     } finally {
       setLoading(false);
     }
@@ -40,11 +46,19 @@ const SeguimientoForm = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await createSeguimiento(id, {
-        ...nuevoRegistro,
+      const dataToSend = {
+        proyecto_docente_id: parseInt(id),
         curso_id: proyecto.curso_id,
-        docente_id: proyecto.docente_id
-      });
+        docente_id: proyecto.docente_id,
+        fecha: new Date(nuevoRegistro.fecha).toISOString(),
+        descripcion: nuevoRegistro.descripcion,
+        desarrollo: nuevoRegistro.desarrollo,
+        porcentaje_avance: nuevoRegistro.porcentaje_avance,
+        estado: nuevoRegistro.estado,
+        observaciones: nuevoRegistro.observaciones
+      };
+      console.log('Creating seguimiento with data:', dataToSend);
+      await createSeguimiento(id, dataToSend);
       setNuevoRegistro({
         fecha: new Date().toISOString().split('T')[0],
         descripcion: '',
@@ -56,6 +70,8 @@ const SeguimientoForm = () => {
       fetchData();
     } catch (error) {
       console.error('Error creating seguimiento:', error);
+      console.error('Error response:', error.response?.data);
+      alert('Error al crear el registro de seguimiento. Verifique los datos e intente nuevamente.');
     }
   };
 
@@ -70,7 +86,20 @@ const SeguimientoForm = () => {
 
   if (loading) return <div className="p-8 text-[#4A4A4A]">Cargando...</div>;
 
-  const avanceTotal = seguimiento.reduce((acc, seg) => {
+  if (!proyecto) {
+    return (
+      <div className="p-8">
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <p className="text-[#4A4A4A] mb-4">No se pudo cargar el proyecto docente.</p>
+          <button onClick={() => navigate('/seguimiento')} className="text-[#F5A623] font-semibold hover:text-[#E09415]">
+            Volver
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const avanceTotal = (seguimiento || []).reduce((acc, seg) => {
     return acc + (seg.estado === 'CUMPLIDO' ? seg.porcentaje_avance : 0);
   }, 0);
 
@@ -89,7 +118,7 @@ const SeguimientoForm = () => {
           <span className="font-bold text-[#1E1E1E]">{avanceTotal}%</span>
         </div>
         <div className="w-full bg-[#E5E7EB] rounded-full h-4">
-          <div className={`${avanceTotal === 100 ? 'bg-[#38A169]' : 'bg-[#F5A623]'} h-4 rounded-full transition-all`} style={{ width: `${avanceTotal}%` }}></div>
+          <div className={(avanceTotal === 100 ? 'bg-[#38A169]' : 'bg-[#F5A623]') + ' h-4 rounded-full transition-all'} style={{ width: `${avanceTotal}%` }}></div>
         </div>
       </div>
 
@@ -174,11 +203,11 @@ const SeguimientoForm = () => {
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <span className="font-semibold text-[#1E1E1E]">{new Date(seg.fecha).toLocaleDateString()}</span>
-                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ` + (
                       seg.estado === 'CUMPLIDO' ? 'bg-[#D1FAE5] text-[#065F46]' :
                       seg.estado === 'PENDIENTE' ? 'bg-[#FEF3C7] text-[#92600A]' :
                       'bg-[#F0F0F0] text-[#666666]'
-                    }`}>
+                    )}>
                       {seg.estado}
                     </span>
                   </div>

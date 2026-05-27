@@ -118,7 +118,7 @@ const AdminCursos = () => {
             </thead>
             <tbody>
               {cursos.map((curso, index) => (
-                <tr key={curso.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'}`}>
+                <tr key={curso.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ` + (index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]')}>
                   <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.nombre}</td>
                   <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.componente}</td>
                   <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.creditos}</td>

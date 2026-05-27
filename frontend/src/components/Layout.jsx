@@ -21,8 +21,8 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#EAF0F7]">
-      <aside className="w-72 h-screen bg-[#1E1E1E] flex flex-col">
+    <div className="flex h-screen bg-[#EAF0F7] overflow-hidden">
+      <aside className="w-72 h-screen bg-[#1E1E1E] flex flex-col fixed left-0 top-0">
         <div className="p-6 border-b border-[#333333]">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-12 h-12 bg-[#F5A623] rounded-xl flex items-center justify-center">
@@ -44,13 +44,13 @@ const Layout = () => {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center px-4 py-3 rounded-xl transition-colors ${
+                  className={`flex items-center px-4 py-3 rounded-xl transition-colors ` + (
                     isActive(item.path)
                       ? 'bg-[#F5A623] text-[#1E1E1E] font-semibold'
                       : 'text-white hover:bg-[#2E2E2E]'
-                  }`}
+                  )}
                 >
-                  <item.icon className={`w-5 h-5 mr-3 ${isActive(item.path) ? 'text-[#1E1E1E]' : 'text-white'}`} />
+                  <item.icon className={`w-5 h-5 mr-3 ` + (isActive(item.path) ? 'text-[#1E1E1E]' : 'text-white')} />
                   {item.label}
                 </Link>
               </li>
@@ -77,7 +77,7 @@ const Layout = () => {
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 ml-72 overflow-y-auto">
         <Outlet />
       </main>
     </div>

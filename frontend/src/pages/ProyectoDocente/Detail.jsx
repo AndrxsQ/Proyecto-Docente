@@ -20,7 +20,7 @@ const ProyectoDocenteDetail = () => {
         getSeguimiento(id)
       ]);
       setProyecto(proyectoData);
-      setSeguimiento(seguimientoData);
+      setSeguimiento(seguimientoData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       setSeguimiento([]);
@@ -91,7 +91,7 @@ const ProyectoDocenteDetail = () => {
           <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Bibliografía</h3>
           {proyecto.bibliografia.map((item) => (
             <div key={item.id} className="border-b border-[#F0F0F0] py-2">
-              <span className={`px-2 py-1 rounded text-xs font-semibold ${item.tipo === 'BASICA' ? 'bg-[#FEF3C7] text-[#92600A]' : 'bg-[#F0F0F0] text-[#666666]'}`}>
+              <span className={`px-2 py-1 rounded text-xs font-semibold ` + (item.tipo === 'BASICA' ? 'bg-[#FEF3C7] text-[#92600A]' : 'bg-[#F0F0F0] text-[#666666]')}>
                 {item.tipo}
               </span>
               <p className="mt-1 text-[#4A4A4A]">{item.referencia}</p>
@@ -109,20 +109,20 @@ const ProyectoDocenteDetail = () => {
               <span className="text-[#1E1E1E] font-semibold">{avanceTotal}%</span>
             </div>
             <div className="w-full bg-[#E5E7EB] rounded-full h-2.5">
-              <div className={`${avanceTotal === 100 ? 'bg-[#38A169]' : 'bg-[#F5A623]'} h-2.5 rounded-full`} style={{ width: `${avanceTotal}%` }}></div>
+              <div className={(avanceTotal === 100 ? 'bg-[#38A169]' : 'bg-[#F5A623]') + ' h-2.5 rounded-full'} style={{ width: `${avanceTotal}%` }}></div>
             </div>
           </div>
-          {seguimiento.length > 0 ? (
+          {(seguimiento || []).length > 0 ? (
             <div className="space-y-3">
-              {seguimiento.map((seg) => (
+              {(seguimiento || []).map((seg) => (
                 <div key={seg.id} className="border border-[#F0F0F0] p-3 rounded-xl">
                   <div className="flex justify-between">
                     <span className="font-semibold text-[#1E1E1E]">{new Date(seg.fecha).toLocaleDateString()}</span>
-                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ` + (
                       seg.estado === 'CUMPLIDO' ? 'bg-[#D1FAE5] text-[#065F46]' :
                       seg.estado === 'PENDIENTE' ? 'bg-[#FEF3C7] text-[#92600A]' :
                       'bg-[#F0F0F0] text-[#666666]'
-                    }`}>
+                    )}>
                       {seg.estado}
                     </span>
                   </div>

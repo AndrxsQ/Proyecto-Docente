@@ -105,7 +105,7 @@ const AdminUsuarios = () => {
             </thead>
             <tbody>
               {usuarios.map((usuario, index) => (
-                <tr key={usuario.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'}`}>
+                <tr key={usuario.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ` + (index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]')}>
                   <td className="py-3 px-4 text-sm text-[#4A4A4A]">{usuario.nombre} {usuario.apellido}</td>
                   <td className="py-3 px-4 text-sm text-[#4A4A4A]">{usuario.email}</td>
                   <td className="py-3 px-4 text-sm text-[#4A4A4A]">{usuario.rol.replace(/_/g, ' ')}</td>

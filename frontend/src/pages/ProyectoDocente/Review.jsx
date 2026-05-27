@@ -102,7 +102,7 @@ const ProyectoDocenteReview = () => {
           <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Bibliografía</h3>
           {proyecto.bibliografia.map((item) => (
             <div key={item.id} className="border-b border-[#F0F0F0] py-2">
-              <span className={`px-2 py-1 rounded text-xs font-semibold ${item.tipo === 'BASICA' ? 'bg-[#FEF3C7] text-[#92600A]' : 'bg-[#F0F0F0] text-[#666666]}`}>
+              <span className={`px-2 py-1 rounded text-xs font-semibold ` + (item.tipo === 'BASICA' ? 'bg-[#FEF3C7] text-[#92600A]' : 'bg-[#F0F0F0] text-[#666666]')}>
                 {item.tipo}
               </span>
               <p className="mt-1 text-[#4A4A4A]">{item.referencia}</p>

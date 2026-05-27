@@ -155,11 +155,11 @@ const ProyectoDocenteList = () => {
                 </tr>
               ) : (
                 proyectos.map((proyecto, index) => (
-                  <tr key={proyecto.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'}`}>
+                  <tr key={proyecto.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ` + (index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]')}>
                     <td className="py-3 px-4 text-sm text-[#4A4A4A]">{proyecto.curso?.nombre}</td>
                     <td className="py-3 px-4 text-sm text-[#4A4A4A]">{proyecto.version}</td>
                     <td className="py-3 px-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getEstadoBadge(proyecto.estado)}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ` + getEstadoBadge(proyecto.estado)}>
                         {proyecto.estado.replace(/_/g, ' ')}
                       </span>
                     </td>

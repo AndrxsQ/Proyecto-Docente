@@ -20,6 +20,9 @@ const ProyectoDocenteEditor = () => {
     } else {
       setLoading(false);
     }
+    return () => {
+      cleanupBlankItems();
+    };
   }, [id]);
 
   useEffect(() => {
@@ -35,6 +38,33 @@ const ProyectoDocenteEditor = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [formato]);
 
+  const cleanupBlankItems = async () => {
+    if (!proyecto || id === 'new') return;
+
+    const blankContenido = contenido.filter(c => !c.tema || !c.descripcion);
+    const blankBibliografia = bibliografia.filter(b => !b.referencia);
+
+    for (const item of blankContenido) {
+      if (typeof item.id === 'number' && item.id < 1000000) {
+        try {
+          await deleteContenido(proyecto.id, item.id);
+        } catch (error) {
+          console.error('Error deleting blank contenido:', error);
+        }
+      }
+    }
+
+    for (const item of blankBibliografia) {
+      if (typeof item.id === 'number' && item.id < 1000000) {
+        try {
+          await deleteBibliografia(proyecto.id, item.id);
+        } catch (error) {
+          console.error('Error deleting blank bibliografia:', error);
+        }
+      }
+    }
+  };
+
   const fetchData = async () => {
     try {
       const [proyectoData, formatoData, contenidoData, bibliografiaData] = await Promise.all([
@@ -45,8 +75,8 @@ const ProyectoDocenteEditor = () => {
       ]);
       setProyecto(proyectoData);
       setFormato(formatoData || {});
-      setContenido(contenidoData);
-      setBibliografia(bibliografiaData);
+      setContenido((contenidoData || []).filter(c => c.tema && c.descripcion));
+      setBibliografia((bibliografiaData || []).filter(b => b.referencia));
     } catch (error) {
       console.error('Error fetching data:', error);
       setContenido([]);
@@ -61,6 +91,7 @@ const ProyectoDocenteEditor = () => {
     try {
       await saveFormato(proyecto.id, formato);
       alert('Formato guardado');
+      navigate('/proyectos-docente');
     } catch (error) {
       console.error('Error saving formato:', error);
     } finally {
@@ -76,20 +107,22 @@ const ProyectoDocenteEditor = () => {
       descripcion: '',
       fecha: new Date().toISOString().split('T')[0]
     };
-    try {
-      const response = await createContenido(proyecto.id, newItem);
-      setContenido([...contenido, { ...newItem, id: response.id }]);
-    } catch (error) {
-      console.error('Error adding contenido:', error);
-    }
+    setContenido([...contenido, { ...newItem, id: Date.now() }]);
   };
 
   const handleUpdateContenido = async (item) => {
     setContenido(contenido.map(c => c.id === item.id ? item : c));
-    try {
-      await updateContenido(proyecto.id, item.id, item);
-    } catch (error) {
-      console.error('Error updating contenido:', error);
+    if (item.tema && item.descripcion) {
+      try {
+        if (typeof item.id === 'number' && item.id < 1000000) {
+          await updateContenido(proyecto.id, item.id, item);
+        } else {
+          const response = await createContenido(proyecto.id, item);
+          setContenido(contenido.map(c => c.id === item.id ? { ...item, id: response.id } : c));
+        }
+      } catch (error) {
+        console.error('Error saving contenido:', error);
+      }
     }
   };
 
@@ -103,23 +136,26 @@ const ProyectoDocenteEditor = () => {
   };
 
   const handleAddBibliografia = async () => {
-    try {
-      const newBibliografia = await createBibliografia(proyecto.id, {
-        referencia: '',
-        tipo: 'BASICA'
-      });
-      setBibliografia([...(bibliografia || []), newBibliografia]);
-    } catch (error) {
-      console.error('Error adding bibliografia:', error);
-    }
+    const newBibliografia = {
+      referencia: '',
+      tipo: 'BASICA'
+    };
+    setBibliografia([...(bibliografia || []), { ...newBibliografia, id: Date.now() }]);
   };
 
   const handleUpdateBibliografia = async (item) => {
     setBibliografia(bibliografia.map(b => b.id === item.id ? item : b));
-    try {
-      await updateBibliografia(proyecto.id, item.id, item);
-    } catch (error) {
-      console.error('Error updating bibliografia:', error);
+    if (item.referencia) {
+      try {
+        if (typeof item.id === 'number' && item.id < 1000000) {
+          await updateBibliografia(proyecto.id, item.id, item);
+        } else {
+          const response = await createBibliografia(proyecto.id, item);
+          setBibliografia(bibliografia.map(b => b.id === item.id ? { ...item, id: response.id } : b));
+        }
+      } catch (error) {
+        console.error('Error saving bibliografia:', error);
+      }
     }
   };
 
@@ -150,9 +186,19 @@ const ProyectoDocenteEditor = () => {
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-[#1E1E1E]">
-          {proyecto ? `Editar <span className="text-[#F5A623]">Proyecto</span> - ${proyecto.curso?.nombre}` : 'Nuevo <span className="text-[#F5A623]">Proyecto</span> Docente'}
+          {proyecto ? (
+            <>Editar <span className="text-[#F5A623]">Proyecto</span> - {proyecto.curso?.nombre}</>
+          ) : (
+            <>Nuevo <span className="text-[#F5A623]">Proyecto</span> Docente</>
+          )}
         </h1>
         <div className="flex gap-2">
+          <button
+            onClick={() => navigate('/proyectos-docente')}
+            className="flex items-center text-[#4A4A4A] font-semibold px-4 py-2 rounded-lg hover:bg-[#F0F0F0] transition-colors"
+          >
+            Volver
+          </button>
           <button
             onClick={handleSaveFormato}
             disabled={saving}
@@ -179,7 +225,7 @@ const ProyectoDocenteEditor = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 ${activeTab === tab ? 'text-[#F5A623] font-semibold border-b-2 border-[#F5A623]' : 'text-[#7A7A7A] hover:text-[#1E1E1E]'}`}
+              className={`px-4 py-2 ` + (activeTab === tab ? 'text-[#F5A623] font-semibold border-b-2 border-[#F5A623]' : 'text-[#7A7A7A] hover:text-[#1E1E1E]')}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
