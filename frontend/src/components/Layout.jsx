@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Home, FileText, ClipboardList, Settings, LogOut, User } from 'lucide-react';
+import { Home, FileText, ClipboardList, Settings, LogOut, User, GraduationCap } from 'lucide-react';
 
 const Layout = () => {
   const { user, logout } = useAuth();
@@ -21,42 +21,56 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <aside className="w-64 bg-white shadow-md">
-        <div className="p-6 border-b">
-          <h1 className="text-xl font-bold text-blue-600">Proyecto Docente</h1>
-          <p className="text-xs text-gray-500">Universidad de Cartagena</p>
+    <div className="flex min-h-screen bg-[#EAF0F7]">
+      <aside className="w-72 h-screen bg-[#1E1E1E] flex flex-col">
+        <div className="p-6 border-b border-[#333333]">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 bg-[#F5A623] rounded-xl flex items-center justify-center">
+              <GraduationCap className="w-7 h-7 text-[#1E1E1E]" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">SGPD</h1>
+              <p className="text-xs text-gray-400">Unicartagena</p>
+            </div>
+          </div>
         </div>
-        <nav className="p-4">
-          <ul className="space-y-2">
+
+        <nav className="flex-1 p-4 overflow-y-auto">
+          <div className="mt-6 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#9A9A9A]">Principal</p>
+          </div>
+          <ul className="space-y-1">
             {getMenuItems().map((item) => (
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                    isActive(item.path) ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'
+                  className={`flex items-center px-4 py-3 rounded-xl transition-colors ${
+                    isActive(item.path)
+                      ? 'bg-[#F5A623] text-[#1E1E1E] font-semibold'
+                      : 'text-white hover:bg-[#2E2E2E]'
                   }`}
                 >
-                  <item.icon className="w-5 h-5 mr-3" />
+                  <item.icon className={`w-5 h-5 mr-3 ${isActive(item.path) ? 'text-[#1E1E1E]' : 'text-white'}`} />
                   {item.label}
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
-        <div className="absolute bottom-0 w-64 p-4 border-t bg-white">
-          <div className="flex items-center mb-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+
+        <div className="p-4 border-t border-[#333333]">
+          <div className="flex items-center mb-4 px-2">
+            <div className="w-10 h-10 bg-[#F5A623] rounded-full flex items-center justify-center text-[#1E1E1E] font-bold">
               {user?.nombre?.charAt(0)}
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium">{user?.nombre} {user?.apellido}</p>
-              <p className="text-xs text-gray-500">{user?.rol?.replace(/_/g, ' ')}</p>
+              <p className="text-sm font-medium text-white">{user?.nombre} {user?.apellido}</p>
+              <p className="text-xs text-gray-400">{user?.rol?.replace(/_/g, ' ')}</p>
             </div>
           </div>
           <button
             onClick={logout}
-            className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+            className="flex items-center w-full px-4 py-3 bg-[#F5A623] text-[#1E1E1E] font-semibold rounded-xl hover:bg-[#E09415] transition-colors"
           >
             <LogOut className="w-5 h-5 mr-3" />
             Cerrar Sesión

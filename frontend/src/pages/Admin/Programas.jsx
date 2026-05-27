@@ -86,48 +86,48 @@ const AdminProgramas = () => {
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestión de Programas Académicos</h1>
+        <h1 className="text-3xl font-bold text-[#1E1E1E]">Gestión de <span className="text-[#F5A623]">Programas</span> Académicos</h1>
         <button
           onClick={() => { setShowModal(true); setEditingPrograma(null); }}
-          className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"
         >
           <Plus className="w-4 h-4 mr-2" />
           Nuevo Programa
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b">
-                <th className="text-left p-4">Nombre</th>
-                <th className="text-left p-4">Modalidad</th>
-                <th className="text-left p-4">Jornada</th>
-                <th className="text-left p-4">Plan de Estudio</th>
-                <th className="text-left p-4">Facultad</th>
-                <th className="text-left p-4">Acciones</th>
+              <tr className="bg-[#1E1E1E]">
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Nombre</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Modalidad</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Jornada</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Plan de Estudio</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Facultad</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {programas.map((programa) => (
-                <tr key={programa.id} className="border-b hover:bg-gray-50">
-                  <td className="p-4">{programa.nombre}</td>
-                  <td className="p-4">{programa.modalidad}</td>
-                  <td className="p-4">{programa.jornada}</td>
-                  <td className="p-4">{programa.plan_estudio}</td>
-                  <td className="p-4">{programa.facultad?.nombre}</td>
-                  <td className="p-4">
+              {programas.map((programa, index) => (
+                <tr key={programa.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'}`}>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{programa.nombre}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{programa.modalidad}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{programa.jornada}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{programa.plan_estudio}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{programa.facultad?.nombre}</td>
+                  <td className="py-3 px-4">
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(programa)}
-                        className="p-2 hover:bg-gray-100 rounded"
+                        className="p-2 hover:bg-[#F0F0F0] rounded-lg text-[#4A4A4A]"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(programa.id)}
-                        className="p-2 hover:bg-gray-100 rounded text-red-600"
+                        className="p-2 hover:bg-[#F0F0F0] rounded-lg text-[#E53E3E]"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -142,27 +142,27 @@ const AdminProgramas = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+            <h2 className="text-xl font-bold text-[#1E1E1E] mb-4">
               {editingPrograma ? 'Editar Programa' : 'Nuevo Programa'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Nombre</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Nombre</label>
                 <input
                   type="text"
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Modalidad</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Modalidad</label>
                 <select
                   value={formData.modalidad}
                   onChange={(e) => setFormData({ ...formData, modalidad: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
                 >
                   <option value="presencial">Presencial</option>
                   <option value="virtual">Virtual</option>
@@ -170,32 +170,32 @@ const AdminProgramas = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Jornada</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Jornada</label>
                 <select
                   value={formData.jornada}
                   onChange={(e) => setFormData({ ...formData, jornada: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
                 >
                   <option value="diurna">Diurna</option>
                   <option value="nocturna">Nocturna</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Plan de Estudio</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Plan de Estudio</label>
                 <input
                   type="number"
                   value={formData.plan_estudio}
                   onChange={(e) => setFormData({ ...formData, plan_estudio: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Facultad</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Facultad</label>
                 <select
                   value={formData.facultad_id}
                   onChange={(e) => setFormData({ ...formData, facultad_id: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
                   required
                 >
                   <option value="">Seleccionar facultad</option>
@@ -208,13 +208,13 @@ const AdminProgramas = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border rounded-md hover:bg-gray-100"
+                  className="px-4 py-2 border border-[#F5A623] text-[#F5A623] rounded-lg hover:bg-[#FFFBF2] transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 bg-[#F5A623] text-[#1E1E1E] font-semibold rounded-lg hover:bg-[#E09415] transition-colors"
                 >
                   Guardar
                 </button>

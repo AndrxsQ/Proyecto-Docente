@@ -144,27 +144,27 @@ const ProyectoDocenteEditor = () => {
     }
   };
 
-  if (loading) return <div className="p-8">Cargando...</div>;
+  if (loading) return <div className="p-8 text-[#4A4A4A]">Cargando...</div>;
 
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">
-          {proyecto ? `Editar Proyecto - ${proyecto.curso?.nombre}` : 'Nuevo Proyecto Docente'}
+        <h1 className="text-3xl font-bold text-[#1E1E1E]">
+          {proyecto ? `Editar <span className="text-[#F5A623]">Proyecto</span> - ${proyecto.curso?.nombre}` : 'Nuevo <span className="text-[#F5A623]">Proyecto</span> Docente'}
         </h1>
         <div className="flex gap-2">
           <button
             onClick={handleSaveFormato}
             disabled={saving}
-            className="flex items-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 disabled:opacity-50"
+            className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] disabled:opacity-50 transition-colors"
           >
             <Save className="w-4 h-4 mr-2" />
             Guardar
           </button>
-          {proyecto && (proyecto.estado === 'BORRADOR' || proyecto.estado === 'DEVUELTO_DOCENTE') && (
+          {proyecto && (proyecto.estado === 'ELABORADO') && (
             <button
               onClick={handleEnviar}
-              className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"
             >
               <Send className="w-4 h-4 mr-2" />
               Enviar para Revisión
@@ -174,12 +174,12 @@ const ProyectoDocenteEditor = () => {
       </div>
 
       <div className="mb-4">
-        <div className="flex border-b">
+        <div className="flex border-b-2 border-[#E5E7EB]">
           {['general', 'resultados', 'contenido', 'evaluacion', 'bibliografia'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}
+              className={`px-4 py-2 ${activeTab === tab ? 'text-[#F5A623] font-semibold border-b-2 border-[#F5A623]' : 'text-[#7A7A7A] hover:text-[#1E1E1E]'}`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
@@ -187,24 +187,24 @@ const ProyectoDocenteEditor = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-xl shadow-sm p-6">
         {activeTab === 'general' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Descripción del Curso</label>
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Descripción del Curso</label>
               <textarea
                 value={formato.descripcion || ''}
                 onChange={(e) => setFormato({ ...formato, descripcion: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md h-32"
+                className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-32"
                 placeholder="Justificación e información general del curso"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Estrategias de Enseñanza</label>
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Estrategias de Enseñanza</label>
               <textarea
                 value={formato.estrategias || ''}
                 onChange={(e) => setFormato({ ...formato, estrategias: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md h-32"
+                className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-32"
                 placeholder="Metodologías de enseñanza"
               />
             </div>
@@ -213,11 +213,11 @@ const ProyectoDocenteEditor = () => {
 
         {activeTab === 'resultados' && (
           <div>
-            <label className="block text-sm font-medium mb-1">Resultados de Aprendizaje</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Resultados de Aprendizaje</label>
             <textarea
               value={formato.resultados_aprendizaje || ''}
               onChange={(e) => setFormato({ ...formato, resultados_aprendizaje: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md h-64"
+              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-64"
               placeholder="Liste los resultados de aprendizaje del curso"
             />
           </div>
@@ -226,21 +226,21 @@ const ProyectoDocenteEditor = () => {
         {activeTab === 'contenido' && (
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold">Contenido Semanal</h3>
-              <button onClick={handleAddContenido} className="flex items-center text-blue-600 hover:text-blue-700">
+              <h3 className="text-lg font-semibold text-[#1E1E1E]">Contenido Semanal</h3>
+              <button onClick={handleAddContenido} className="flex items-center text-[#F5A623] font-semibold hover:text-[#E09415]">
                 <Plus className="w-4 h-4 mr-1" />
                 Agregar Semana
               </button>
             </div>
             <div className="space-y-4">
               {!contenido || contenido.length === 0 ? (
-                <p className="text-gray-500">No hay contenido para mostrar</p>
+                <p className="text-[#4A4A4A]">No hay contenido para mostrar</p>
               ) : (
                 contenido.map((item) => (
-                  <div key={item.id} className="border p-4 rounded-md">
+                  <div key={item.id} className="border border-[#F0F0F0] p-4 rounded-xl">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="font-medium">Semana {item.semana}</span>
-                      <button onClick={() => handleDeleteContenido(item.id)} className="text-red-600 hover:text-red-700">
+                      <span className="font-semibold text-[#1E1E1E]">Semana {item.semana}</span>
+                      <button onClick={() => handleDeleteContenido(item.id)} className="text-[#E53E3E] hover:text-[#C53030]">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -248,20 +248,20 @@ const ProyectoDocenteEditor = () => {
                       type="text"
                       value={item.tema}
                       onChange={(e) => handleUpdateContenido({ ...item, tema: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-md mb-2"
+                      className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] mb-2"
                       placeholder="Tema"
                     />
                     <textarea
                       value={item.descripcion}
                       onChange={(e) => handleUpdateContenido({ ...item, descripcion: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-md h-20"
+                      className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-20"
                       placeholder="Descripción"
                     />
                     <input
                       type="date"
                       value={item.fecha ? item.fecha.split('T')[0] : ''}
                       onChange={(e) => handleUpdateContenido({ ...item, fecha: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-md mt-2"
+                      className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 mt-2"
                     />
                   </div>
                 ))
@@ -272,11 +272,11 @@ const ProyectoDocenteEditor = () => {
 
         {activeTab === 'evaluacion' && (
           <div>
-            <label className="block text-sm font-medium mb-1">Criterios y Porcentajes de Evaluación</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Criterios y Porcentajes de Evaluación</label>
             <textarea
               value={formato.evaluacion_resultados || ''}
               onChange={(e) => setFormato({ ...formato, evaluacion_resultados: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md h-64"
+              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-64"
               placeholder="Describa los criterios de evaluación y sus porcentajes"
             />
           </div>
@@ -285,35 +285,35 @@ const ProyectoDocenteEditor = () => {
         {activeTab === 'bibliografia' && (
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold">Bibliografía</h3>
-              <button onClick={handleAddBibliografia} className="flex items-center text-blue-600 hover:text-blue-700">
+              <h3 className="text-lg font-semibold text-[#1E1E1E]">Bibliografía</h3>
+              <button onClick={handleAddBibliografia} className="flex items-center text-[#F5A623] font-semibold hover:text-[#E09415]">
                 <Plus className="w-4 h-4 mr-1" />
                 Agregar Referencia
               </button>
             </div>
             <div className="space-y-4">
               {!bibliografia || bibliografia.length === 0 ? (
-                <p className="text-gray-500">No hay bibliografía para mostrar</p>
+                <p className="text-[#4A4A4A]">No hay bibliografía para mostrar</p>
               ) : (
                 bibliografia.map((item) => (
-                  <div key={item.id} className="border p-4 rounded-md">
+                  <div key={item.id} className="border border-[#F0F0F0] p-4 rounded-xl">
                     <div className="flex justify-between items-start mb-2">
                       <select
                         value={item.tipo}
                         onChange={(e) => handleUpdateBibliografia({ ...item, tipo: e.target.value })}
-                        className="px-3 py-1 border rounded-md text-sm"
+                        className="px-4 py-2 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 text-sm"
                       >
                         <option value="BASICA">Básica</option>
                         <option value="COMPLEMENTARIA">Complementaria</option>
                       </select>
-                      <button onClick={() => handleDeleteBibliografia(item.id)} className="text-red-600 hover:text-red-700">
+                      <button onClick={() => handleDeleteBibliografia(item.id)} className="text-[#E53E3E] hover:text-[#C53030]">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                     <textarea
                       value={item.referencia}
                       onChange={(e) => handleUpdateBibliografia({ ...item, referencia: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-md h-20"
+                      className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-20"
                       placeholder="Referencia bibliográfica completa"
                     />
                   </div>

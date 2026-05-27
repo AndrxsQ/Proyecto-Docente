@@ -93,41 +93,41 @@ const AdminCursos = () => {
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestión de Cursos</h1>
+        <h1 className="text-3xl font-bold text-[#1E1E1E]">Gestión de <span className="text-[#F5A623]">Cursos</span></h1>
         <button
           onClick={() => { setShowModal(true); setEditingCurso(null); }}
-          className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"
         >
           <Plus className="w-4 h-4 mr-2" />
           Nuevo Curso
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b">
-                <th className="text-left p-4">Nombre</th>
-                <th className="text-left p-4">Componente</th>
-                <th className="text-left p-4">Créditos</th>
-                <th className="text-left p-4">Tipo</th>
-                <th className="text-left p-4">Periodo</th>
-                <th className="text-left p-4">Acciones</th>
+              <tr className="bg-[#1E1E1E]">
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Nombre</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Componente</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Créditos</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Tipo</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Periodo</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {cursos.map((curso) => (
-                <tr key={curso.id} className="border-b hover:bg-gray-50">
-                  <td className="p-4">{curso.nombre}</td>
-                  <td className="p-4">{curso.componente}</td>
-                  <td className="p-4">{curso.creditos}</td>
-                  <td className="p-4">{curso.tipo}</td>
-                  <td className="p-4">{curso.periodo_academico}</td>
-                  <td className="p-4">
+              {cursos.map((curso, index) => (
+                <tr key={curso.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'}`}>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.nombre}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.componente}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.creditos}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.tipo}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.periodo_academico}</td>
+                  <td className="py-3 px-4">
                     <button
                       onClick={() => handleEdit(curso)}
-                      className="p-2 hover:bg-gray-100 rounded"
+                      className="p-2 hover:bg-[#F0F0F0] rounded-lg text-[#4A4A4A]"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
@@ -141,56 +141,56 @@ const AdminCursos = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
-          <div className="bg-white p-6 rounded-lg w-full max-w-2xl m-4">
-            <h2 className="text-xl font-bold mb-4">
+          <div className="bg-white p-6 rounded-xl w-full max-w-2xl m-4 shadow-lg">
+            <h2 className="text-xl font-bold text-[#1E1E1E] mb-4">
               {editingCurso ? 'Editar Curso' : 'Nuevo Curso'}
             </h2>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Nombre</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Nombre</label>
                 <input
                   type="text"
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Componente</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Componente</label>
                 <input
                   type="text"
                   value={formData.componente}
                   onChange={(e) => setFormData({ ...formData, componente: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Créditos</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Créditos</label>
                 <input
                   type="number"
                   value={formData.creditos}
                   onChange={(e) => setFormData({ ...formData, creditos: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Total Horas</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Total Horas</label>
                 <input
                   type="number"
                   value={formData.total_horas}
                   onChange={(e) => setFormData({ ...formData, total_horas: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Tipo</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Tipo</label>
                 <select
                   value={formData.tipo}
                   onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
                 >
                   <option value="teórico">Teórico</option>
                   <option value="práctico">Práctico</option>
@@ -198,22 +198,22 @@ const AdminCursos = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Periodo Académico</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Periodo Académico</label>
                 <input
                   type="text"
                   value={formData.periodo_academico}
                   onChange={(e) => setFormData({ ...formData, periodo_academico: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
                   placeholder="ej. 2025-1"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Programa</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Programa</label>
                 <select
                   value={formData.programa_id}
                   onChange={(e) => setFormData({ ...formData, programa_id: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
                   required
                 >
                   <option value="">Seleccionar programa</option>
@@ -223,34 +223,34 @@ const AdminCursos = () => {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Prerrequisitos</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Prerrequisitos</label>
                 <input
                   type="text"
                   value={formData.prerrequisitos}
                   onChange={(e) => setFormData({ ...formData, prerrequisitos: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Correquisitos</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Correquisitos</label>
                 <input
                   type="text"
                   value={formData.correquisitos}
                   onChange={(e) => setFormData({ ...formData, correquisitos: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
                 />
               </div>
               <div className="md:col-span-2 flex gap-2 justify-end">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border rounded-md hover:bg-gray-100"
+                  className="px-4 py-2 border border-[#F5A623] text-[#F5A623] rounded-lg hover:bg-[#FFFBF2] transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 bg-[#F5A623] text-[#1E1E1E] font-semibold rounded-lg hover:bg-[#E09415] transition-colors"
                 >
                   Guardar
                 </button>

@@ -68,7 +68,7 @@ const SeguimientoForm = () => {
     }
   };
 
-  if (loading) return <div className="p-8">Cargando...</div>;
+  if (loading) return <div className="p-8 text-[#4A4A4A]">Cargando...</div>;
 
   const avanceTotal = seguimiento.reduce((acc, seg) => {
     return acc + (seg.estado === 'CUMPLIDO' ? seg.porcentaje_avance : 0);
@@ -77,41 +77,41 @@ const SeguimientoForm = () => {
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Seguimiento - {proyecto.curso?.nombre}</h1>
-        <button onClick={() => navigate('/seguimiento')} className="text-gray-600 hover:text-gray-900">
+        <h1 className="text-3xl font-bold text-[#1E1E1E]">Seguimiento - <span className="text-[#F5A623]">{proyecto.curso?.nombre}</span></h1>
+        <button onClick={() => navigate('/seguimiento')} className="text-[#4A4A4A] hover:text-[#1E1E1E]">
           Volver
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div className="flex justify-between mb-2">
-          <span className="font-semibold">Avance Total del Curso</span>
-          <span className="font-bold">{avanceTotal}%</span>
+          <span className="font-semibold text-[#1E1E1E]">Avance Total del Curso</span>
+          <span className="font-bold text-[#1E1E1E]">{avanceTotal}%</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-4">
-          <div className="bg-blue-600 h-4 rounded-full transition-all" style={{ width: `${avanceTotal}%` }}></div>
+        <div className="w-full bg-[#E5E7EB] rounded-full h-4">
+          <div className={`${avanceTotal === 100 ? 'bg-[#38A169]' : 'bg-[#F5A623]'} h-4 rounded-full transition-all`} style={{ width: `${avanceTotal}%` }}></div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="font-semibold mb-4">Nuevo Registro de Seguimiento</h3>
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Nuevo Registro de Seguimiento</h3>
         <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Fecha</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Fecha</label>
             <input
               type="date"
               value={nuevoRegistro.fecha}
               onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, fecha: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Estado</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Estado</label>
             <select
               value={nuevoRegistro.estado}
               onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, estado: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
             >
               <option value="CUMPLIDO">CUMPLIDO</option>
               <option value="PENDIENTE">PENDIENTE</option>
@@ -119,45 +119,45 @@ const SeguimientoForm = () => {
             </select>
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">Tema / Descripción</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Tema / Descripción</label>
             <input
               type="text"
               value={nuevoRegistro.descripcion}
               onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, descripcion: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
               required
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">Desarrollo de la Clase</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Desarrollo de la Clase</label>
             <textarea
               value={nuevoRegistro.desarrollo}
               onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, desarrollo: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md h-24"
+              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-24"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Porcentaje de Avance (%)</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Porcentaje de Avance (%)</label>
             <input
               type="number"
               min="0"
               max="100"
               value={nuevoRegistro.porcentaje_avance}
               onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, porcentaje_avance: parseInt(e.target.value) || 0 })}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
               required
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">Observaciones</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Observaciones</label>
             <textarea
               value={nuevoRegistro.observaciones}
               onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, observaciones: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md h-20"
+              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-20"
             />
           </div>
           <div className="md:col-span-2">
-            <button type="submit" className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+            <button type="submit" className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors">
               <Plus className="w-4 h-4 mr-2" />
               Agregar Registro
             </button>
@@ -165,35 +165,35 @@ const SeguimientoForm = () => {
         </form>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="font-semibold mb-4">Historial de Seguimiento</h3>
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Historial de Seguimiento</h3>
         {seguimiento.length > 0 ? (
           <div className="space-y-4">
             {seguimiento.map((seg) => (
-              <div key={seg.id} className="border p-4 rounded-md">
+              <div key={seg.id} className="border border-[#F0F0F0] p-4 rounded-xl">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <span className="font-medium">{new Date(seg.fecha).toLocaleDateString()}</span>
-                    <span className={`ml-2 px-2 py-1 rounded text-xs ${
-                      seg.estado === 'CUMPLIDO' ? 'bg-green-100 text-green-800' :
-                      seg.estado === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
+                    <span className="font-semibold text-[#1E1E1E]">{new Date(seg.fecha).toLocaleDateString()}</span>
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
+                      seg.estado === 'CUMPLIDO' ? 'bg-[#D1FAE5] text-[#065F46]' :
+                      seg.estado === 'PENDIENTE' ? 'bg-[#FEF3C7] text-[#92600A]' :
+                      'bg-[#F0F0F0] text-[#666666]'
                     }`}>
                       {seg.estado}
                     </span>
                   </div>
-                  <span className="text-sm font-medium">{seg.porcentaje_avance}%</span>
+                  <span className="text-sm font-semibold text-[#1E1E1E]">{seg.porcentaje_avance}%</span>
                 </div>
-                <p className="font-medium">{seg.descripcion}</p>
-                <p className="text-gray-600 text-sm mt-1">{seg.desarrollo}</p>
+                <p className="font-semibold text-[#1E1E1E]">{seg.descripcion}</p>
+                <p className="text-[#4A4A4A] text-sm mt-1">{seg.desarrollo}</p>
                 {seg.observaciones && (
-                  <p className="text-gray-500 text-sm mt-2">Obs: {seg.observaciones}</p>
+                  <p className="text-[#7A7A7A] text-sm mt-2">Obs: {seg.observaciones}</p>
                 )}
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No hay registros de seguimiento</p>
+          <p className="text-[#4A4A4A]">No hay registros de seguimiento</p>
         )}
       </div>
     </div>
