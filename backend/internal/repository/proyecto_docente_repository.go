@@ -101,11 +101,15 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 	query := `
 		SELECT pd.id, pd.asignatura_id, pd.version, pd.estado, pd.creacion, pd.ultima_modificacion,
 		       pd.docente_id, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano,
-		       c.id, c.nombre, c.componente, c.creditos, c.total_horas, c.tipo,
+		       c.id, c.nombre, c.componente, c.area, c.codigo, c.creditos, c.horas_ti, c.horas_tde, c.horas_tdp, c.total_horas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico, c.programa_id, c.docente_id,
+		       p.id, p.nombre as programa_nombre, p.modalidad, p.jornada, p.facultad_id,
+		       f.id, f.nombre as facultad_nombre,
 		       u.id, u.nombre, u.apellido, u.email, u.rol
 		FROM proyectos_docente pd
 		LEFT JOIN asignaturas c ON pd.asignatura_id = c.id
+		LEFT JOIN programas_academicos p ON c.programa_id = p.id
+		LEFT JOIN facultades f ON p.facultad_id = f.id
 		LEFT JOIN usuarios u ON pd.docente_id = u.id
 		WHERE pd.id = $1
 	`
@@ -114,11 +118,17 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 	var pd models.ProyectoDocente
 	var asignatura models.Asignatura
 	var docente models.Usuario
+	var programaID, programaFacultadID sql.NullInt64
+	var programaNombre, programaModalidad, programaJornada sql.NullString
+	var facultadID sql.NullInt64
+	var facultadNombre sql.NullString
 	err := row.Scan(
 		&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion,
 		&pd.DocenteID, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano,
-		&asignatura.ID, &asignatura.Nombre, &asignatura.Componente, &asignatura.Creditos, &asignatura.TotalHoras, &asignatura.Tipo,
+		&asignatura.ID, &asignatura.Nombre, &asignatura.Componente, &asignatura.Area, &asignatura.Codigo, &asignatura.Creditos, &asignatura.HorasTI, &asignatura.HorasTDE, &asignatura.HorasTDP, &asignatura.TotalHoras, &asignatura.Tipo,
 		&asignatura.Prerrequisitos, &asignatura.Correquisitos, &asignatura.PeriodoAcademico, &asignatura.ProgramaID, &asignatura.DocenteID,
+		&programaID, &programaNombre, &programaModalidad, &programaJornada, &programaFacultadID,
+		&facultadID, &facultadNombre,
 		&docente.ID, &docente.Nombre, &docente.Apellido, &docente.Email, &docente.Rol,
 	)
 	if err == sql.ErrNoRows {
@@ -130,6 +140,22 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 
 	pd.Asignatura = &asignatura
 	pd.Docente = &docente
+
+	if programaID.Valid {
+		asignatura.Programa = &models.ProgramaAcademico{
+			ID:         int(programaID.Int64),
+			Nombre:     programaNombre.String,
+			Modalidad:  models.Modalidad(programaModalidad.String),
+			Jornada:    models.Jornada(programaJornada.String),
+			FacultadID: int(programaFacultadID.Int64),
+		}
+		if facultadID.Valid {
+			asignatura.Programa.Facultad = &models.Facultad{
+				ID:     int(facultadID.Int64),
+				Nombre: facultadNombre.String,
+			}
+		}
+	}
 
 	return &pd, nil
 }

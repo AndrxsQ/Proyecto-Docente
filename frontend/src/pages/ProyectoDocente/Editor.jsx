@@ -10,7 +10,7 @@ const ProyectoDocenteEditor = () => {
   const [formato, setFormato] = useState({});
   const [contenido, setContenido] = useState([]);
   const [bibliografia, setBibliografia] = useState([]);
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState('asignatura');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -221,7 +221,7 @@ const ProyectoDocenteEditor = () => {
 
       <div className="mb-4">
         <div className="flex border-b-2 border-[#E5E7EB]">
-          {['general', 'resultados', 'contenido', 'evaluacion', 'bibliografia'].map((tab) => (
+          {['asignatura', 'general', 'resultados', 'contenido', 'evaluacion', 'bibliografia'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -234,6 +234,81 @@ const ProyectoDocenteEditor = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm p-6">
+        {activeTab === 'asignatura' && (
+          <div className="space-y-6">
+            <div className="border-b border-[#F0F0F0] pb-4">
+              <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Información General</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Facultad</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.programa?.facultad?.nombre || '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Programa</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.programa?.nombre || '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Asignatura</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.nombre || '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Versión del Proyecto Docente</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.version || '-'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Información de la Asignatura</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Código de la Asignatura</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.codigo || '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Componente</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.componente || '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Tipo de Asignatura</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.tipo || '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Número de Créditos</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.creditos || '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Horas Totales</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.total_horas || '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Horas de Trabajo Independiente (TI)</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.horas_ti || '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Horas Teóricas de Acompañamiento Directo (TDE)</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.horas_tde || '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Horas Prácticas de Acompañamiento Directo (TDP)</label>
+                  <p className="text-[#4A4A4A] font-medium">{proyecto?.asignatura?.horas_tdp || '-'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Prerrequisitos</label>
+                <p className="text-[#4A4A4A] font-medium whitespace-pre-line">{proyecto?.asignatura?.prerrequisitos || 'Ninguno'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Correquisitos</label>
+                <p className="text-[#4A4A4A] font-medium whitespace-pre-line">{proyecto?.asignatura?.correquisitos || 'Ninguno'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'general' && (
           <div className="space-y-4">
             <div>
