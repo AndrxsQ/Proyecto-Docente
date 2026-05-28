@@ -17,8 +17,8 @@ func (s *SeguimientoService) GetByProyectoDocenteID(pdID int) ([]models.Seguimie
 	return s.repo.GetByProyectoDocenteID(pdID)
 }
 
-func (s *SeguimientoService) GetByCursoID(cursoID int) ([]models.Seguimiento, error) {
-	return s.repo.GetByCursoID(cursoID)
+func (s *SeguimientoService) GetByAsignaturaID(asignaturaID int) ([]models.Seguimiento, error) {
+	return s.repo.GetByAsignaturaID(asignaturaID)
 }
 
 func (s *SeguimientoService) GetByID(id int) (*models.Seguimiento, error) {
