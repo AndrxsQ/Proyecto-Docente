@@ -129,6 +129,7 @@ type Asignatura struct {
 	HorasTDE         int                `json:"horas_tde"`
 	HorasTDP         int                `json:"horas_tdp"`
 	TotalHoras       int                `json:"total_horas"`
+	Semanas          int                `json:"semanas"`
 	Tipo             TipoAsignatura     `json:"tipo"`
 	Prerrequisitos   *string            `json:"prerrequisitos"`
 	Correquisitos    *string            `json:"correquisitos"`

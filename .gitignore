@@ -87,5 +87,4 @@ Thumbs.db
 *.backup
 *~
 
-backend/db/migrations/003_update_constraints.sql
-backend/db/migrations/004_update_states.sql
+backend/db/migrations/*

@@ -101,7 +101,7 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 	query := `
 		SELECT pd.id, pd.asignatura_id, pd.version, pd.estado, pd.creacion, pd.ultima_modificacion,
 		       pd.docente_id, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano,
-		       c.id, c.nombre, c.componente, c.area, c.codigo, c.creditos, c.horas_ti, c.horas_tde, c.horas_tdp, c.total_horas, c.tipo,
+		       c.id, c.nombre, c.componente, c.area, c.codigo, c.creditos, c.horas_ti, c.horas_tde, c.horas_tdp, c.total_horas, c.semanas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico, c.programa_id, c.docente_id,
 		       p.id, p.nombre as programa_nombre, p.modalidad, p.jornada, p.facultad_id,
 		       f.id, f.nombre as facultad_nombre,
@@ -125,7 +125,7 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 	err := row.Scan(
 		&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion,
 		&pd.DocenteID, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano,
-		&asignatura.ID, &asignatura.Nombre, &asignatura.Componente, &asignatura.Area, &asignatura.Codigo, &asignatura.Creditos, &asignatura.HorasTI, &asignatura.HorasTDE, &asignatura.HorasTDP, &asignatura.TotalHoras, &asignatura.Tipo,
+		&asignatura.ID, &asignatura.Nombre, &asignatura.Componente, &asignatura.Area, &asignatura.Codigo, &asignatura.Creditos, &asignatura.HorasTI, &asignatura.HorasTDE, &asignatura.HorasTDP, &asignatura.TotalHoras, &asignatura.Semanas, &asignatura.Tipo,
 		&asignatura.Prerrequisitos, &asignatura.Correquisitos, &asignatura.PeriodoAcademico, &asignatura.ProgramaID, &asignatura.DocenteID,
 		&programaID, &programaNombre, &programaModalidad, &programaJornada, &programaFacultadID,
 		&facultadID, &facultadNombre,

@@ -10,7 +10,7 @@ const ProyectoDocenteEditor = () => {
   const [formato, setFormato] = useState({});
   const [contenido, setContenido] = useState([]);
   const [bibliografia, setBibliografia] = useState([]);
-  const [activeTab, setActiveTab] = useState('asignatura');
+  const [activeTab, setActiveTab] = useState('Información');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -75,7 +75,21 @@ const ProyectoDocenteEditor = () => {
       ]);
       setProyecto(proyectoData);
       setFormato(formatoData || {});
-      setContenido((contenidoData || []).filter(c => c.tema && c.descripcion));
+      
+      // Auto-generate weeks based on asignatura.semanas if no contenido exists
+      const numSemanas = proyectoData?.asignatura?.semanas || 16;
+      if (!contenidoData || contenidoData.length === 0) {
+        const generatedContenido = Array.from({ length: numSemanas }, (_, i) => ({
+          id: Date.now() + i,
+          semana: i + 1,
+          tema: '',
+          descripcion: ''
+        }));
+        setContenido(generatedContenido);
+      } else {
+        setContenido((contenidoData || []).filter(c => c.tema && c.descripcion));
+      }
+      
       setBibliografia((bibliografiaData || []).filter(b => b.referencia));
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -99,17 +113,6 @@ const ProyectoDocenteEditor = () => {
     }
   };
 
-  const handleAddContenido = async () => {
-    const newSemana = (contenido?.length || 0) + 1;
-    const newItem = {
-      semana: newSemana,
-      tema: '',
-      descripcion: '',
-      fecha: new Date().toISOString().split('T')[0]
-    };
-    setContenido([...contenido, { ...newItem, id: Date.now() }]);
-  };
-
   const handleUpdateContenido = async (item) => {
     setContenido(contenido.map(c => c.id === item.id ? item : c));
     if (item.tema && item.descripcion) {
@@ -123,15 +126,6 @@ const ProyectoDocenteEditor = () => {
       } catch (error) {
         console.error('Error saving contenido:', error);
       }
-    }
-  };
-
-  const handleDeleteContenido = async (itemId) => {
-    try {
-      await deleteContenido(proyecto.id, itemId);
-      setContenido(contenido.filter(c => c.id !== itemId));
-    } catch (error) {
-      console.error('Error deleting contenido:', error);
     }
   };
 
@@ -169,6 +163,46 @@ const ProyectoDocenteEditor = () => {
   };
 
   const handleEnviar = async () => {
+    // Validate all fields before sending
+    const errors = [];
+    
+    // Validate General tab
+    if (!formato.descripcion || formato.descripcion.trim() === '') {
+      errors.push('La descripción de la asignatura es obligatoria');
+    }
+    if (!formato.estrategias || formato.estrategias.trim() === '') {
+      errors.push('Las estrategias metodológicas son obligatorias');
+    }
+    
+    // Validate Resultados tab
+    if (!formato.resultados_aprendizaje || formato.resultados_aprendizaje.trim() === '') {
+      errors.push('La contribución a los resultados de aprendizaje es obligatoria');
+    }
+    
+    // Validate Contenido tab - all weeks must have tema and descripcion
+    if (!contenido || contenido.length === 0) {
+      errors.push('El contenido del curso es obligatorio');
+    } else {
+      contenido.forEach((item, index) => {
+        if (!item.tema || item.tema.trim() === '') {
+          errors.push(`El tema de la semana ${item.semana} es obligatorio`);
+        }
+        if (!item.descripcion || item.descripcion.trim() === '') {
+          errors.push(`La descripción de la semana ${item.semana} es obligatoria`);
+        }
+      });
+    }
+    
+    // Validate Evaluación tab
+    if (!formato.evaluacion_resultados || formato.evaluacion_resultados.trim() === '') {
+      errors.push('La evaluación de los resultados de aprendizaje es obligatoria');
+    }
+    
+    if (errors.length > 0) {
+      alert('No se puede enviar con campos vacíos');
+      return;
+    }
+    
     if (!confirm('¿Está seguro de enviar el proyecto para revisión?')) return;
     try {
       await enviarProyectoDocente(proyecto.id);
@@ -221,7 +255,7 @@ const ProyectoDocenteEditor = () => {
 
       <div className="mb-4">
         <div className="flex border-b-2 border-[#E5E7EB]">
-          {['asignatura', 'general', 'resultados', 'contenido', 'evaluacion', 'bibliografia'].map((tab) => (
+          {['Información', 'General', 'Resultados', 'Contenido', 'Evaluación', 'Bibliografía'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -234,7 +268,7 @@ const ProyectoDocenteEditor = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm p-6">
-        {activeTab === 'asignatura' && (
+        {activeTab === 'Información' && (
           <div className="space-y-6">
             <div className="border-b border-[#F0F0F0] pb-4">
               <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Información General</h3>
@@ -309,7 +343,7 @@ const ProyectoDocenteEditor = () => {
           </div>
         )}
 
-        {activeTab === 'general' && (
+        {activeTab === 'General' && (
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Descripción de la Asignatura</label>
@@ -321,7 +355,7 @@ const ProyectoDocenteEditor = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Estrategias de Enseñanza</label>
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Estrategias Metodológicas</label>
               <textarea
                 value={formato.estrategias || ''}
                 onChange={(e) => setFormato({ ...formato, estrategias: e.target.value })}
@@ -332,26 +366,22 @@ const ProyectoDocenteEditor = () => {
           </div>
         )}
 
-        {activeTab === 'resultados' && (
+        {activeTab === 'Resultados' && (
           <div>
-            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Resultados de Aprendizaje</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Contribución a los Resultados de Aprendizaje</label>
             <textarea
               value={formato.resultados_aprendizaje || ''}
               onChange={(e) => setFormato({ ...formato, resultados_aprendizaje: e.target.value })}
               className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-64"
-              placeholder="Liste los resultados de aprendizaje de la asignatura"
+              placeholder="Liste las contribuciones a los resultados de aprendizaje de la asignatura"
             />
           </div>
         )}
 
-        {activeTab === 'contenido' && (
+        {activeTab === 'Contenido' && (
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-[#1E1E1E]">Contenido Semanal</h3>
-              <button onClick={handleAddContenido} className="flex items-center text-[#F5A623] font-semibold hover:text-[#E09415]">
-                <Plus className="w-4 h-4 mr-1" />
-                Agregar Semana
-              </button>
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-[#1E1E1E]">Contenido del Curso/Asignatura</h3>
             </div>
             <div className="space-y-4">
               {!contenido || contenido.length === 0 ? (
@@ -359,11 +389,8 @@ const ProyectoDocenteEditor = () => {
               ) : (
                 contenido.map((item) => (
                   <div key={item.id} className="border border-[#F0F0F0] p-4 rounded-xl">
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="mb-2">
                       <span className="font-semibold text-[#1E1E1E]">Semana {item.semana}</span>
-                      <button onClick={() => handleDeleteContenido(item.id)} className="text-[#E53E3E] hover:text-[#C53030]">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
                     </div>
                     <input
                       type="text"
@@ -378,12 +405,6 @@ const ProyectoDocenteEditor = () => {
                       className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-20"
                       placeholder="Descripción"
                     />
-                    <input
-                      type="date"
-                      value={item.fecha ? item.fecha.split('T')[0] : ''}
-                      onChange={(e) => handleUpdateContenido({ ...item, fecha: e.target.value })}
-                      className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 mt-2"
-                    />
                   </div>
                 ))
               )}
@@ -391,19 +412,19 @@ const ProyectoDocenteEditor = () => {
           </div>
         )}
 
-        {activeTab === 'evaluacion' && (
+        {activeTab === 'Evaluación' && (
           <div>
-            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Criterios y Porcentajes de Evaluación</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Evaluación de los Resultados de Aprendizaje</label>
             <textarea
               value={formato.evaluacion_resultados || ''}
               onChange={(e) => setFormato({ ...formato, evaluacion_resultados: e.target.value })}
               className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-64"
-              placeholder="Describa los criterios de evaluación y sus porcentajes"
+              placeholder="Describa los criterios de evaluación"
             />
           </div>
         )}
 
-        {activeTab === 'bibliografia' && (
+        {activeTab === 'Bibliografía' && (
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-[#1E1E1E]">Bibliografía</h3>
