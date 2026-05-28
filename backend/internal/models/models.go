@@ -99,9 +99,8 @@ const (
 type TipoAsignatura string
 
 const (
-	TipoAsignaturaTeorico         TipoAsignatura = "teórico"
-	TipoAsignaturaPractico        TipoAsignatura = "práctico"
-	TipoAsignaturaTeoricoPractico TipoAsignatura = "teórico-práctico"
+	TipoAsignaturaObligatorio TipoAsignatura = "obligatorio"
+	TipoAsignaturaOpcional    TipoAsignatura = "opcional"
 )
 
 type Facultad struct {
@@ -123,7 +122,12 @@ type Asignatura struct {
 	ID               int                `json:"id"`
 	Nombre           string             `json:"nombre"`
 	Componente       string             `json:"componente"`
+	Area             string             `json:"area"`
+	Codigo           string             `json:"codigo"`
 	Creditos         int                `json:"creditos"`
+	HorasTI          int                `json:"horas_ti"`
+	HorasTDE         int                `json:"horas_tde"`
+	HorasTDP         int                `json:"horas_tdp"`
 	TotalHoras       int                `json:"total_horas"`
 	Tipo             TipoAsignatura     `json:"tipo"`
 	Prerrequisitos   *string            `json:"prerrequisitos"`

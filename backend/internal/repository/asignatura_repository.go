@@ -16,7 +16,7 @@ func NewAsignaturaRepository(db *DB) *AsignaturaRepository {
 
 func (r *AsignaturaRepository) GetAll(filters map[string]interface{}) ([]models.Asignatura, error) {
 	query := `
-		SELECT c.id, c.nombre, c.componente, c.creditos, c.total_horas, c.tipo,
+		SELECT c.id, c.nombre, c.componente, c.area, c.codigo, c.creditos, c.horas_ti, c.horas_tde, c.horas_tdp, c.total_horas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico,
 		       c.programa_id, c.docente_id,
 		       p.nombre as programa_nombre, p.modalidad, p.jornada,
@@ -62,7 +62,7 @@ func (r *AsignaturaRepository) GetAll(filters map[string]interface{}) ([]models.
 		var docenteNombre, docenteApellido sql.NullString
 		var prerequisitos, correquisitos sql.NullString
 		if err := rows.Scan(
-			&c.ID, &c.Nombre, &c.Componente, &c.Creditos, &c.TotalHoras, &c.Tipo,
+			&c.ID, &c.Nombre, &c.Componente, &c.Area, &c.Codigo, &c.Creditos, &c.HorasTI, &c.HorasTDE, &c.HorasTDP, &c.TotalHoras, &c.Tipo,
 			&prerequisitos, &correquisitos, &c.PeriodoAcademico,
 			&c.ProgramaID, &c.DocenteID,
 			&programaNombre, &programaModalidad, &programaJornada,
@@ -103,7 +103,7 @@ func (r *AsignaturaRepository) GetAll(filters map[string]interface{}) ([]models.
 
 func (r *AsignaturaRepository) GetByID(id int) (*models.Asignatura, error) {
 	query := `
-		SELECT c.id, c.nombre, c.componente, c.creditos, c.total_horas, c.tipo,
+		SELECT c.id, c.nombre, c.componente, c.area, c.codigo, c.creditos, c.horas_ti, c.horas_tde, c.horas_tdp, c.total_horas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico,
 		       c.programa_id, c.docente_id,
 		       p.nombre as programa_nombre, p.modalidad, p.jornada,
@@ -120,7 +120,7 @@ func (r *AsignaturaRepository) GetByID(id int) (*models.Asignatura, error) {
 	var docenteNombre, docenteApellido sql.NullString
 	var prerequisitos, correquisitos sql.NullString
 	err := row.Scan(
-		&c.ID, &c.Nombre, &c.Componente, &c.Creditos, &c.TotalHoras, &c.Tipo,
+		&c.ID, &c.Nombre, &c.Componente, &c.Area, &c.Codigo, &c.Creditos, &c.HorasTI, &c.HorasTDE, &c.HorasTDP, &c.TotalHoras, &c.Tipo,
 		&prerequisitos, &correquisitos, &c.PeriodoAcademico,
 		&c.ProgramaID, &c.DocenteID,
 		&programaNombre, &programaModalidad, &programaJornada,
@@ -162,8 +162,8 @@ func (r *AsignaturaRepository) GetByID(id int) (*models.Asignatura, error) {
 
 func (r *AsignaturaRepository) Create(asignatura *models.Asignatura) error {
 	query := `
-		INSERT INTO asignaturas (nombre, componente, creditos, total_horas, tipo, prerrequisitos, correquisitos, periodo_academico, programa_id, docente_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
+		INSERT INTO asignaturas (nombre, componente, area, codigo, creditos, horas_ti, horas_tde, horas_tdp, total_horas, tipo, prerrequisitos, correquisitos, periodo_academico, programa_id, docente_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id
 	`
 	prerequisitosVal := ""
 	if asignatura.Prerrequisitos != nil {
@@ -173,7 +173,8 @@ func (r *AsignaturaRepository) Create(asignatura *models.Asignatura) error {
 	if asignatura.Correquisitos != nil {
 		correquisitosVal = *asignatura.Correquisitos
 	}
-	return r.db.QueryRow(query, asignatura.Nombre, asignatura.Componente, asignatura.Creditos,
+	return r.db.QueryRow(query, asignatura.Nombre, asignatura.Componente, asignatura.Area, asignatura.Codigo, asignatura.Creditos,
+		asignatura.HorasTI, asignatura.HorasTDE, asignatura.HorasTDP,
 		asignatura.TotalHoras, asignatura.Tipo, prerequisitosVal, correquisitosVal,
 		asignatura.PeriodoAcademico, asignatura.ProgramaID, asignatura.DocenteID).Scan(&asignatura.ID)
 }
@@ -181,10 +182,10 @@ func (r *AsignaturaRepository) Create(asignatura *models.Asignatura) error {
 func (r *AsignaturaRepository) Update(asignatura *models.Asignatura) error {
 	query := `
 		UPDATE asignaturas
-		SET nombre = $1, componente = $2, creditos = $3, total_horas = $4, tipo = $5,
-		    prerrequisitos = $6, correquisitos = $7, periodo_academico = $8,
-		    programa_id = $9, docente_id = $10
-		WHERE id = $11
+		SET nombre = $1, componente = $2, area = $3, codigo = $4, creditos = $5, horas_ti = $6, horas_tde = $7, horas_tdp = $8, total_horas = $9, tipo = $10,
+		    prerrequisitos = $11, correquisitos = $12, periodo_academico = $13,
+		    programa_id = $14, docente_id = $15
+		WHERE id = $16
 	`
 	prerequisitosVal := ""
 	if asignatura.Prerrequisitos != nil {
@@ -194,7 +195,8 @@ func (r *AsignaturaRepository) Update(asignatura *models.Asignatura) error {
 	if asignatura.Correquisitos != nil {
 		correquisitosVal = *asignatura.Correquisitos
 	}
-	_, err := r.db.Exec(query, asignatura.Nombre, asignatura.Componente, asignatura.Creditos,
+	_, err := r.db.Exec(query, asignatura.Nombre, asignatura.Componente, asignatura.Area, asignatura.Codigo, asignatura.Creditos,
+		asignatura.HorasTI, asignatura.HorasTDE, asignatura.HorasTDP,
 		asignatura.TotalHoras, asignatura.Tipo, prerequisitosVal, correquisitosVal,
 		asignatura.PeriodoAcademico, asignatura.ProgramaID, asignatura.DocenteID, asignatura.ID)
 	return err
@@ -208,7 +210,7 @@ func (r *AsignaturaRepository) Delete(id int) error {
 
 func (r *AsignaturaRepository) GetByDocente(docenteID int, periodo string) ([]models.Asignatura, error) {
 	query := `
-		SELECT c.id, c.nombre, c.componente, c.creditos, c.total_horas, c.tipo,
+		SELECT c.id, c.nombre, c.componente, c.area, c.codigo, c.creditos, c.horas_ti, c.horas_tde, c.horas_tdp, c.total_horas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico,
 		       c.programa_id, c.docente_id,
 		       p.nombre as programa_nombre, p.modalidad, p.jornada
@@ -228,7 +230,7 @@ func (r *AsignaturaRepository) GetByDocente(docenteID int, periodo string) ([]mo
 		var c models.Asignatura
 		var programaNombre, programaModalidad, programaJornada sql.NullString
 		if err := rows.Scan(
-			&c.ID, &c.Nombre, &c.Componente, &c.Creditos, &c.TotalHoras, &c.Tipo,
+			&c.ID, &c.Nombre, &c.Componente, &c.Area, &c.Codigo, &c.Creditos, &c.HorasTI, &c.HorasTDE, &c.HorasTDP, &c.TotalHoras, &c.Tipo,
 			&c.Prerrequisitos, &c.Correquisitos, &c.PeriodoAcademico,
 			&c.ProgramaID, &c.DocenteID,
 			&programaNombre, &programaModalidad, &programaJornada,
