@@ -23,7 +23,22 @@ func (h *ProgramaHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	programas, err := h.programaService.GetAll()
+	// Get facultad_id from query parameters for filtering
+	facultadIDStr := r.URL.Query().Get("facultad_id")
+	var programas []models.ProgramaAcademico
+	var err error
+
+	if facultadIDStr != "" {
+		facultadID, err := strconv.Atoi(facultadIDStr)
+		if err != nil {
+			http.Error(w, "Invalid facultad_id", http.StatusBadRequest)
+			return
+		}
+		programas, err = h.programaService.GetByFacultad(facultadID)
+	} else {
+		programas, err = h.programaService.GetAll()
+	}
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

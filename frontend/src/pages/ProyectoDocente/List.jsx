@@ -2,15 +2,21 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProyectosDocentes, createProyectoDocente, aprobarProyectoDocente, enviarProyectoDocente } from '../../api/proyectosDocente';
 import { getAsignaturas } from '../../api/asignaturas';
+import { getFacultades } from '../../api/facultades';
+import { getProgramas } from '../../api/programas';
 import { useAuth } from '../../context/AuthContext';
 import { Plus, Eye, Edit, Check, Send } from 'lucide-react';
 
 const ProyectoDocenteList = () => {
   const [proyectos, setProyectos] = useState([]);
   const [asignaturas, setAsignaturas] = useState([]);
+  const [facultades, setFacultades] = useState([]);
+  const [programas, setProgramas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showNewModal, setShowNewModal] = useState(false);
   const [selectedAsignatura, setSelectedAsignatura] = useState('');
+  const [selectedFacultad, setSelectedFacultad] = useState('');
+  const [selectedPrograma, setSelectedPrograma] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -24,18 +30,94 @@ const ProyectoDocenteList = () => {
       if (user.rol === 'DOCENTE') {
         filters.docente_id = user.id;
       }
+      
+      // Fetch facultades and programas
+      const [facultadesData, programasData] = await Promise.all([
+        getFacultades(),
+        getProgramas()
+      ]);
+      setFacultades(facultadesData || []);
+      setProgramas(programasData || []);
+      
+      // Pre-select facultad and programa based on user's relationships
+      if (user.facultad_id) {
+        setSelectedFacultad(user.facultad_id.toString());
+        // Filter programas to show only those from the user's facultad
+        const filteredProgramas = programasData.filter(p => p.facultad_id === user.facultad_id);
+        setProgramas(filteredProgramas || []);
+      }
+      if (user.programa_id) {
+        setSelectedPrograma(user.programa_id.toString());
+      }
+      
+      // Fetch proyectos and asignaturas
       const [proyectosData, asignaturasData] = await Promise.all([
         getProyectosDocentes(filters),
         getAsignaturas(user.rol === 'DOCENTE' ? { docente_id: user.id } : {})
       ]);
-      setProyectos(proyectosData);
-      setAsignaturas(asignaturasData);
+      setProyectos(proyectosData || []);
+      setAsignaturas(asignaturasData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       setProyectos([]);
       setAsignaturas([]);
+      setFacultades([]);
+      setProgramas([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFacultadChange = async (e) => {
+    const facultadId = e.target.value;
+    setSelectedFacultad(facultadId);
+    setSelectedPrograma('');
+    setSelectedAsignatura('');
+    
+    // Fetch programas filtered by facultad
+    if (facultadId) {
+      try {
+        const programasData = await getProgramas({ facultad_id: facultadId });
+        setProgramas(programasData);
+      } catch (error) {
+        console.error('Error fetching programas:', error);
+        setProgramas([]);
+      }
+    } else {
+      // If no facultad selected, fetch all programas
+      try {
+        const programasData = await getProgramas();
+        setProgramas(programasData);
+      } catch (error) {
+        console.error('Error fetching programas:', error);
+        setProgramas([]);
+      }
+    }
+  };
+
+  const handleProgramaChange = async (e) => {
+    const programaId = e.target.value;
+    setSelectedPrograma(programaId);
+    setSelectedAsignatura('');
+    
+    // Fetch asignaturas filtered by programa
+    if (programaId) {
+      try {
+        const asignaturasData = await getAsignaturas({ programa_id: programaId });
+        setAsignaturas(asignaturasData || []);
+      } catch (error) {
+        console.error('Error fetching asignaturas:', error);
+        setAsignaturas([]);
+      }
+    } else {
+      // If no programa selected, fetch all asignaturas for the docente
+      try {
+        const asignaturasData = await getAsignaturas(user.rol === 'DOCENTE' ? { docente_id: user.id } : {});
+        setAsignaturas(asignaturasData || []);
+      } catch (error) {
+        console.error('Error fetching asignaturas:', error);
+        setAsignaturas([]);
+      }
     }
   };
 
@@ -216,15 +298,49 @@ const ProyectoDocenteList = () => {
             <h2 className="text-xl font-bold text-[#1E1E1E] mb-4">Crear Nuevo Proyecto Docente</h2>
             <form onSubmit={handleCreate}>
               <div className="mb-4">
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Facultad</label>
+                <select
+                  value={selectedFacultad}
+                  onChange={handleFacultadChange}
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
+                  required
+                >
+                  <option value="">Seleccionar facultad</option>
+                  {facultades.map((facultad) => (
+                    <option key={facultad.id} value={facultad.id}>
+                      {facultad.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Programa</label>
+                <select
+                  value={selectedPrograma}
+                  onChange={handleProgramaChange}
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
+                  required
+                  disabled={!selectedFacultad}
+                >
+                  <option value="">Seleccionar programa</option>
+                  {programas.map((programa) => (
+                    <option key={programa.id} value={programa.id}>
+                      {programa.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
                 <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Asignatura</label>
                 <select
                   value={selectedAsignatura}
                   onChange={(e) => setSelectedAsignatura(e.target.value)}
                   className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
                   required
+                  disabled={!selectedPrograma}
                 >
                   <option value="">Seleccionar asignatura</option>
-                  {asignaturas.map((asignatura) => (
+                  {asignaturas && asignaturas.map((asignatura) => (
                     <option key={asignatura.id} value={asignatura.id}>
                       {asignatura.nombre}
                     </option>
@@ -234,7 +350,12 @@ const ProyectoDocenteList = () => {
               <div className="flex gap-2 justify-end">
                 <button
                   type="button"
-                  onClick={() => setShowNewModal(false)}
+                  onClick={() => {
+                    setShowNewModal(false);
+                    setSelectedFacultad('');
+                    setSelectedPrograma('');
+                    setSelectedAsignatura('');
+                  }}
                   className="px-4 py-2 border border-[#F5A623] text-[#F5A623] rounded-lg hover:bg-[#FFFBF2] transition-colors"
                 >
                   Cancelar
