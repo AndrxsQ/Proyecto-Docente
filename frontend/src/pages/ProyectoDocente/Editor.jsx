@@ -187,7 +187,7 @@ const ProyectoDocenteEditor = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-[#1E1E1E]">
           {proyecto ? (
-            <>Editar <span className="text-[#F5A623]">Proyecto</span> - {proyecto.curso?.nombre}</>
+            <>Editar <span className="text-[#F5A623]">Proyecto</span> - {proyecto.asignatura?.nombre}</>
           ) : (
             <>Nuevo <span className="text-[#F5A623]">Proyecto</span> Docente</>
           )}
@@ -237,12 +237,12 @@ const ProyectoDocenteEditor = () => {
         {activeTab === 'general' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Descripción del Curso</label>
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Descripción de la Asignatura</label>
               <textarea
                 value={formato.descripcion || ''}
                 onChange={(e) => setFormato({ ...formato, descripcion: e.target.value })}
                 className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-32"
-                placeholder="Justificación e información general del curso"
+                placeholder="Justificación e información general de la asignatura"
               />
             </div>
             <div>
@@ -264,7 +264,7 @@ const ProyectoDocenteEditor = () => {
               value={formato.resultados_aprendizaje || ''}
               onChange={(e) => setFormato({ ...formato, resultados_aprendizaje: e.target.value })}
               className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-64"
-              placeholder="Liste los resultados de aprendizaje del curso"
+              placeholder="Liste los resultados de aprendizaje de la asignatura"
             />
           </div>
         )}

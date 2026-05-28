@@ -96,12 +96,12 @@ const (
 	JornadaNocturna Jornada = "nocturna"
 )
 
-type TipoCurso string
+type TipoAsignatura string
 
 const (
-	TipoCursoTeorico         TipoCurso = "teórico"
-	TipoCursoPractico        TipoCurso = "práctico"
-	TipoCursoTeoricoPractico TipoCurso = "teórico-práctico"
+	TipoAsignaturaTeorico         TipoAsignatura = "teórico"
+	TipoAsignaturaPractico        TipoAsignatura = "práctico"
+	TipoAsignaturaTeoricoPractico TipoAsignatura = "teórico-práctico"
 )
 
 type Facultad struct {
@@ -119,13 +119,13 @@ type ProgramaAcademico struct {
 	Facultad    *Facultad `json:"facultad,omitempty"`
 }
 
-type Curso struct {
+type Asignatura struct {
 	ID               int                `json:"id"`
 	Nombre           string             `json:"nombre"`
 	Componente       string             `json:"componente"`
 	Creditos         int                `json:"creditos"`
 	TotalHoras       int                `json:"total_horas"`
-	Tipo             TipoCurso          `json:"tipo"`
+	Tipo             TipoAsignatura     `json:"tipo"`
 	Prerrequisitos   *string            `json:"prerrequisitos"`
 	Correquisitos    *string            `json:"correquisitos"`
 	PeriodoAcademico string             `json:"periodo_academico"`
@@ -150,7 +150,7 @@ type Usuario struct {
 
 type ProyectoDocente struct {
 	ID                 int              `json:"id"`
-	CursoID            int              `json:"curso_id"`
+	AsignaturaID       int              `json:"asignatura_id"`
 	Version            int              `json:"version"`
 	Estado             EstadoPD         `json:"estado"`
 	Creacion           time.Time        `json:"creacion"`
@@ -160,7 +160,7 @@ type ProyectoDocente struct {
 	EstadoDirector     EstadoRevision   `json:"estado_director"`
 	EstadoComite       EstadoRevision   `json:"estado_comite"`
 	EstadoDecano       EstadoRevision   `json:"estado_decano"`
-	Curso              *Curso           `json:"curso,omitempty"`
+	Asignatura         *Asignatura      `json:"asignatura,omitempty"`
 	Docente            *Usuario         `json:"docente,omitempty"`
 	Formato            *Formato         `json:"formato,omitempty"`
 	Contenido          []ContenidoCurso `json:"contenido,omitempty"`
@@ -192,7 +192,7 @@ type ContenidoCurso struct {
 type Seguimiento struct {
 	ID                int               `json:"id"`
 	ProyectoDocenteID int               `json:"proyecto_docente_id"`
-	CursoID           int               `json:"curso_id"`
+	AsignaturaID      int               `json:"asignatura_id"`
 	DocenteID         int               `json:"docente_id"`
 	Fecha             time.Time         `json:"fecha"`
 	Desarrollo        string            `json:"desarrollo"`

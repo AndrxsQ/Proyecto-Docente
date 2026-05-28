@@ -6,22 +6,22 @@ import (
 	"strconv"
 )
 
-type CursoRepository struct {
+type AsignaturaRepository struct {
 	db *DB
 }
 
-func NewCursoRepository(db *DB) *CursoRepository {
-	return &CursoRepository{db: db}
+func NewAsignaturaRepository(db *DB) *AsignaturaRepository {
+	return &AsignaturaRepository{db: db}
 }
 
-func (r *CursoRepository) GetAll(filters map[string]interface{}) ([]models.Curso, error) {
+func (r *AsignaturaRepository) GetAll(filters map[string]interface{}) ([]models.Asignatura, error) {
 	query := `
 		SELECT c.id, c.nombre, c.componente, c.creditos, c.total_horas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico,
 		       c.programa_id, c.docente_id,
 		       p.nombre as programa_nombre, p.modalidad, p.jornada,
 		       u.nombre as docente_nombre, u.apellido as docente_apellido
-		FROM cursos c
+		FROM asignaturas c
 		LEFT JOIN programas_academicos p ON c.programa_id = p.id
 		LEFT JOIN usuarios u ON c.docente_id = u.id
 		WHERE 1=1
@@ -55,9 +55,9 @@ func (r *CursoRepository) GetAll(filters map[string]interface{}) ([]models.Curso
 	}
 	defer rows.Close()
 
-	var cursos []models.Curso
+	var asignaturas []models.Asignatura
 	for rows.Next() {
-		var c models.Curso
+		var c models.Asignatura
 		var programaNombre, programaModalidad, programaJornada sql.NullString
 		var docenteNombre, docenteApellido sql.NullString
 		var prerequisitos, correquisitos sql.NullString
@@ -95,27 +95,27 @@ func (r *CursoRepository) GetAll(filters map[string]interface{}) ([]models.Curso
 			}
 		}
 
-		cursos = append(cursos, c)
+		asignaturas = append(asignaturas, c)
 	}
 
-	return cursos, nil
+	return asignaturas, nil
 }
 
-func (r *CursoRepository) GetByID(id int) (*models.Curso, error) {
+func (r *AsignaturaRepository) GetByID(id int) (*models.Asignatura, error) {
 	query := `
 		SELECT c.id, c.nombre, c.componente, c.creditos, c.total_horas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico,
 		       c.programa_id, c.docente_id,
 		       p.nombre as programa_nombre, p.modalidad, p.jornada,
 		       u.nombre as docente_nombre, u.apellido as docente_apellido
-		FROM cursos c
+		FROM asignaturas c
 		LEFT JOIN programas_academicos p ON c.programa_id = p.id
 		LEFT JOIN usuarios u ON c.docente_id = u.id
 		WHERE c.id = $1
 	`
 	row := r.db.QueryRow(query, id)
 
-	var c models.Curso
+	var c models.Asignatura
 	var programaNombre, programaModalidad, programaJornada sql.NullString
 	var docenteNombre, docenteApellido sql.NullString
 	var prerequisitos, correquisitos sql.NullString
@@ -160,59 +160,59 @@ func (r *CursoRepository) GetByID(id int) (*models.Curso, error) {
 	return &c, nil
 }
 
-func (r *CursoRepository) Create(curso *models.Curso) error {
+func (r *AsignaturaRepository) Create(asignatura *models.Asignatura) error {
 	query := `
-		INSERT INTO cursos (nombre, componente, creditos, total_horas, tipo, prerrequisitos, correquisitos, periodo_academico, programa_id, docente_id)
+		INSERT INTO asignaturas (nombre, componente, creditos, total_horas, tipo, prerrequisitos, correquisitos, periodo_academico, programa_id, docente_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
 	`
 	prerequisitosVal := ""
-	if curso.Prerrequisitos != nil {
-		prerequisitosVal = *curso.Prerrequisitos
+	if asignatura.Prerrequisitos != nil {
+		prerequisitosVal = *asignatura.Prerrequisitos
 	}
 	correquisitosVal := ""
-	if curso.Correquisitos != nil {
-		correquisitosVal = *curso.Correquisitos
+	if asignatura.Correquisitos != nil {
+		correquisitosVal = *asignatura.Correquisitos
 	}
-	return r.db.QueryRow(query, curso.Nombre, curso.Componente, curso.Creditos,
-		curso.TotalHoras, curso.Tipo, prerequisitosVal, correquisitosVal,
-		curso.PeriodoAcademico, curso.ProgramaID, curso.DocenteID).Scan(&curso.ID)
+	return r.db.QueryRow(query, asignatura.Nombre, asignatura.Componente, asignatura.Creditos,
+		asignatura.TotalHoras, asignatura.Tipo, prerequisitosVal, correquisitosVal,
+		asignatura.PeriodoAcademico, asignatura.ProgramaID, asignatura.DocenteID).Scan(&asignatura.ID)
 }
 
-func (r *CursoRepository) Update(curso *models.Curso) error {
+func (r *AsignaturaRepository) Update(asignatura *models.Asignatura) error {
 	query := `
-		UPDATE cursos
+		UPDATE asignaturas
 		SET nombre = $1, componente = $2, creditos = $3, total_horas = $4, tipo = $5,
 		    prerrequisitos = $6, correquisitos = $7, periodo_academico = $8,
 		    programa_id = $9, docente_id = $10
 		WHERE id = $11
 	`
 	prerequisitosVal := ""
-	if curso.Prerrequisitos != nil {
-		prerequisitosVal = *curso.Prerrequisitos
+	if asignatura.Prerrequisitos != nil {
+		prerequisitosVal = *asignatura.Prerrequisitos
 	}
 	correquisitosVal := ""
-	if curso.Correquisitos != nil {
-		correquisitosVal = *curso.Correquisitos
+	if asignatura.Correquisitos != nil {
+		correquisitosVal = *asignatura.Correquisitos
 	}
-	_, err := r.db.Exec(query, curso.Nombre, curso.Componente, curso.Creditos,
-		curso.TotalHoras, curso.Tipo, prerequisitosVal, correquisitosVal,
-		curso.PeriodoAcademico, curso.ProgramaID, curso.DocenteID, curso.ID)
+	_, err := r.db.Exec(query, asignatura.Nombre, asignatura.Componente, asignatura.Creditos,
+		asignatura.TotalHoras, asignatura.Tipo, prerequisitosVal, correquisitosVal,
+		asignatura.PeriodoAcademico, asignatura.ProgramaID, asignatura.DocenteID, asignatura.ID)
 	return err
 }
 
-func (r *CursoRepository) Delete(id int) error {
-	query := "DELETE FROM cursos WHERE id = $1"
+func (r *AsignaturaRepository) Delete(id int) error {
+	query := "DELETE FROM asignaturas WHERE id = $1"
 	_, err := r.db.Exec(query, id)
 	return err
 }
 
-func (r *CursoRepository) GetByDocente(docenteID int, periodo string) ([]models.Curso, error) {
+func (r *AsignaturaRepository) GetByDocente(docenteID int, periodo string) ([]models.Asignatura, error) {
 	query := `
 		SELECT c.id, c.nombre, c.componente, c.creditos, c.total_horas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico,
 		       c.programa_id, c.docente_id,
 		       p.nombre as programa_nombre, p.modalidad, p.jornada
-		FROM cursos c
+		FROM asignaturas c
 		LEFT JOIN programas_academicos p ON c.programa_id = p.id
 		WHERE c.docente_id = $1 AND c.periodo_academico = $2
 		ORDER BY c.nombre
@@ -223,9 +223,9 @@ func (r *CursoRepository) GetByDocente(docenteID int, periodo string) ([]models.
 	}
 	defer rows.Close()
 
-	var cursos []models.Curso
+	var asignaturas []models.Asignatura
 	for rows.Next() {
-		var c models.Curso
+		var c models.Asignatura
 		var programaNombre, programaModalidad, programaJornada sql.NullString
 		if err := rows.Scan(
 			&c.ID, &c.Nombre, &c.Componente, &c.Creditos, &c.TotalHoras, &c.Tipo,
@@ -245,8 +245,8 @@ func (r *CursoRepository) GetByDocente(docenteID int, periodo string) ([]models.
 			}
 		}
 
-		cursos = append(cursos, c)
+		asignaturas = append(asignaturas, c)
 	}
 
-	return cursos, nil
+	return asignaturas, nil
 }

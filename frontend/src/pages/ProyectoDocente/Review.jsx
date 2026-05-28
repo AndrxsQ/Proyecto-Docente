@@ -58,7 +58,7 @@ const ProyectoDocenteReview = () => {
       <h1 className="text-3xl font-bold text-[#1E1E1E] mb-6">Revisión de <span className="text-[#F5A623]">Proyecto</span> Docente</h1>
       
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <h2 className="text-xl font-semibold text-[#1E1E1E] mb-4">{proyecto.curso?.nombre}</h2>
+        <h2 className="text-xl font-semibold text-[#1E1E1E] mb-4">{proyecto.asignatura?.nombre}</h2>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <span className="text-[#7A7A7A] text-sm">Versión:</span> <span className="text-[#1E1E1E] font-medium">{proyecto.version}</span>
@@ -87,7 +87,7 @@ const ProyectoDocenteReview = () => {
 
       {proyecto.contenido && proyecto.contenido.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-          <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Contenido del Curso</h3>
+          <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Contenido de la Asignatura</h3>
           {proyecto.contenido.map((item) => (
             <div key={item.id} className="border-b border-[#F0F0F0] py-3">
               <p className="font-semibold text-[#1E1E1E]">Semana {item.semana}: {item.tema}</p>

@@ -16,12 +16,12 @@ func NewProyectoDocenteRepository(db *DB) *ProyectoDocenteRepository {
 
 func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]models.ProyectoDocente, error) {
 	query := `
-		SELECT pd.id, pd.curso_id, pd.version, pd.estado, pd.creacion, pd.ultima_modificacion,
+		SELECT pd.id, pd.asignatura_id, pd.version, pd.estado, pd.creacion, pd.ultima_modificacion,
 		       pd.docente_id, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano,
-		       c.nombre as curso_nombre, c.componente, c.creditos, c.periodo_academico,
+		       c.nombre as asignatura_nombre, c.componente, c.creditos, c.periodo_academico,
 		       u.nombre as docente_nombre, u.apellido as docente_apellido
 		FROM proyectos_docente pd
-		LEFT JOIN cursos c ON pd.curso_id = c.id
+		LEFT JOIN asignaturas c ON pd.asignatura_id = c.id
 		LEFT JOIN usuarios u ON pd.docente_id = u.id
 		WHERE 1=1
 	`
@@ -34,9 +34,9 @@ func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]mo
 		argIndex++
 	}
 
-	if cursoID, ok := filters["curso_id"]; ok {
-		query += " AND pd.curso_id = $" + string(rune('0'+argIndex))
-		args = append(args, cursoID)
+	if asignaturaID, ok := filters["asignatura_id"]; ok {
+		query += " AND pd.asignatura_id = $" + string(rune('0'+argIndex))
+		args = append(args, asignaturaID)
 		argIndex++
 	}
 
@@ -63,23 +63,23 @@ func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]mo
 	var proyectos []models.ProyectoDocente
 	for rows.Next() {
 		var pd models.ProyectoDocente
-		var cursoNombre, componente, periodo string
+		var asignaturaNombre, componente, periodo string
 		var creditos int
 		var docenteNombre, docenteApellido sql.NullString
 		if err := rows.Scan(
-			&pd.ID, &pd.CursoID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion,
+			&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion,
 			&pd.DocenteID, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano,
-			&cursoNombre, &componente, &creditos, &periodo,
+			&asignaturaNombre, &componente, &creditos, &periodo,
 			&docenteNombre, &docenteApellido,
 		); err != nil {
 			return nil, err
 		}
 
-		pd.Curso = &models.Curso{
-			ID:              pd.CursoID,
-			Nombre:          cursoNombre,
-			Componente:      componente,
-			Creditos:        creditos,
+		pd.Asignatura = &models.Asignatura{
+			ID:               pd.AsignaturaID,
+			Nombre:           asignaturaNombre,
+			Componente:       componente,
+			Creditos:         creditos,
 			PeriodoAcademico: periodo,
 		}
 
@@ -99,26 +99,26 @@ func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]mo
 
 func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, error) {
 	query := `
-		SELECT pd.id, pd.curso_id, pd.version, pd.estado, pd.creacion, pd.ultima_modificacion,
+		SELECT pd.id, pd.asignatura_id, pd.version, pd.estado, pd.creacion, pd.ultima_modificacion,
 		       pd.docente_id, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano,
 		       c.id, c.nombre, c.componente, c.creditos, c.total_horas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico, c.programa_id, c.docente_id,
 		       u.id, u.nombre, u.apellido, u.email, u.rol
 		FROM proyectos_docente pd
-		LEFT JOIN cursos c ON pd.curso_id = c.id
+		LEFT JOIN asignaturas c ON pd.asignatura_id = c.id
 		LEFT JOIN usuarios u ON pd.docente_id = u.id
 		WHERE pd.id = $1
 	`
 	row := r.db.QueryRow(query, id)
 
 	var pd models.ProyectoDocente
-	var curso models.Curso
+	var asignatura models.Asignatura
 	var docente models.Usuario
 	err := row.Scan(
-		&pd.ID, &pd.CursoID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion,
+		&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion,
 		&pd.DocenteID, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano,
-		&curso.ID, &curso.Nombre, &curso.Componente, &curso.Creditos, &curso.TotalHoras, &curso.Tipo,
-		&curso.Prerrequisitos, &curso.Correquisitos, &curso.PeriodoAcademico, &curso.ProgramaID, &curso.DocenteID,
+		&asignatura.ID, &asignatura.Nombre, &asignatura.Componente, &asignatura.Creditos, &asignatura.TotalHoras, &asignatura.Tipo,
+		&asignatura.Prerrequisitos, &asignatura.Correquisitos, &asignatura.PeriodoAcademico, &asignatura.ProgramaID, &asignatura.DocenteID,
 		&docente.ID, &docente.Nombre, &docente.Apellido, &docente.Email, &docente.Rol,
 	)
 	if err == sql.ErrNoRows {
@@ -128,7 +128,7 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 		return nil, err
 	}
 
-	pd.Curso = &curso
+	pd.Asignatura = &asignatura
 	pd.Docente = &docente
 
 	return &pd, nil
@@ -136,10 +136,10 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 
 func (r *ProyectoDocenteRepository) Create(pd *models.ProyectoDocente) error {
 	query := `
-		INSERT INTO proyectos_docente (curso_id, version, estado, docente_id)
+		INSERT INTO proyectos_docente (asignatura_id, version, estado, docente_id)
 		VALUES ($1, $2, $3, $4) RETURNING id
 	`
-	return r.db.QueryRow(query, pd.CursoID, pd.Version, pd.Estado, pd.DocenteID).Scan(&pd.ID)
+	return r.db.QueryRow(query, pd.AsignaturaID, pd.Version, pd.Estado, pd.DocenteID).Scan(&pd.ID)
 }
 
 func (r *ProyectoDocenteRepository) Update(pd *models.ProyectoDocente) error {
@@ -154,24 +154,24 @@ func (r *ProyectoDocenteRepository) Update(pd *models.ProyectoDocente) error {
 	return err
 }
 
-func (r *ProyectoDocenteRepository) GetNextVersion(cursoID int) (int, error) {
-	query := "SELECT COALESCE(MAX(version), 0) FROM proyectos_docente WHERE curso_id = $1"
+func (r *ProyectoDocenteRepository) GetNextVersion(asignaturaID int) (int, error) {
+	query := "SELECT COALESCE(MAX(version), 0) FROM proyectos_docente WHERE asignatura_id = $1"
 	var maxVersion int
-	err := r.db.QueryRow(query, cursoID).Scan(&maxVersion)
+	err := r.db.QueryRow(query, asignaturaID).Scan(&maxVersion)
 	if err != nil {
 		return 0, err
 	}
 	return maxVersion + 1, nil
 }
 
-func (r *ProyectoDocenteRepository) GetByCurso(cursoID int) ([]models.ProyectoDocente, error) {
+func (r *ProyectoDocenteRepository) GetByAsignatura(asignaturaID int) ([]models.ProyectoDocente, error) {
 	query := `
-		SELECT id, curso_id, version, estado, creacion, ultima_modificacion, docente_id
+		SELECT id, asignatura_id, version, estado, creacion, ultima_modificacion, docente_id
 		FROM proyectos_docente
-		WHERE curso_id = $1
+		WHERE asignatura_id = $1
 		ORDER BY version DESC
 	`
-	rows, err := r.db.Query(query, cursoID)
+	rows, err := r.db.Query(query, asignaturaID)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func (r *ProyectoDocenteRepository) GetByCurso(cursoID int) ([]models.ProyectoDo
 	for rows.Next() {
 		var pd models.ProyectoDocente
 		if err := rows.Scan(
-			&pd.ID, &pd.CursoID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion, &pd.DocenteID,
+			&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion, &pd.DocenteID,
 		); err != nil {
 			return nil, err
 		}

@@ -1,21 +1,21 @@
 import { useAuth } from '../context/AuthContext';
 import { getProyectosDocentes } from '../api/proyectosDocente';
-import { getCursos } from '../api/cursos';
+import { getAsignaturas } from '../api/asignaturas';
 import { useEffect, useState } from 'react';
 import { FileText, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [proyectos, setProyectos] = useState([]);
-  const [cursos, setCursos] = useState([]);
+  const [asignaturas, setAsignaturas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (user.rol === 'DOCENTE') {
-          const cursosData = await getCursos({ docente_id: user.id });
-          setCursos(cursosData);
+          const asignaturasData = await getAsignaturas({ docente_id: user.id });
+          setAsignaturas(asignaturasData);
           
           const proyectosData = await getProyectosDocentes({ docente_id: user.id });
           setProyectos(proyectosData);
@@ -35,7 +35,7 @@ const Dashboard = () => {
       } catch (error) {
         console.error('Error fetching data:', error);
         setProyectos([]);
-        setCursos([]);
+        setAsignaturas([]);
       } finally {
         setLoading(false);
       }
@@ -129,7 +129,7 @@ const Dashboard = () => {
               <table className="w-full">
                 <thead>
                   <tr className="bg-[#1E1E1E]">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-white">Curso</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-white">Asignatura</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-white">Versión</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-white">Estado</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-white">Última Modificación</th>
@@ -138,7 +138,7 @@ const Dashboard = () => {
                 <tbody>
                   {proyectos.slice(0, 5).map((proyecto, index) => (
                     <tr key={proyecto.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ` + (index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]')}>
-                      <td className="py-3 px-4 text-sm text-[#4A4A4A]">{proyecto.curso?.nombre}</td>
+                      <td className="py-3 px-4 text-sm text-[#4A4A4A]">{proyecto.asignatura?.nombre}</td>
                       <td className="py-3 px-4 text-sm text-[#4A4A4A]">{proyecto.version}</td>
                       <td className="py-3 px-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ` + getEstadoBadge(proyecto.estado)}>

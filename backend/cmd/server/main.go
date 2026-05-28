@@ -50,9 +50,9 @@ func main() {
 	usuarioService := service.NewUsuarioService(usuarioRepo, authService)
 	usuarioHandler := handlers.NewUsuarioHandler(usuarioService)
 
-	cursoRepo := repository.NewCursoRepository(db)
-	cursoService := service.NewCursoService(cursoRepo)
-	cursoHandler := handlers.NewCursoHandler(cursoService)
+	asignaturaRepo := repository.NewAsignaturaRepository(db)
+	asignaturaService := service.NewAsignaturaService(asignaturaRepo)
+	asignaturaHandler := handlers.NewAsignaturaHandler(asignaturaService)
 
 	formatoRepo := repository.NewFormatoRepository(db)
 	formatoService := service.NewFormatoService(formatoRepo)
@@ -98,10 +98,11 @@ func main() {
 	r.HandleFunc("/api/usuarios", authMiddleware.Authenticate(authMiddleware.RequireRole(models.RolAdmin)(usuarioHandler.Create))).Methods("POST")
 	r.HandleFunc("/api/usuarios/{id}", authMiddleware.Authenticate(authMiddleware.RequireRole(models.RolAdmin)(usuarioHandler.Update))).Methods("PUT")
 
-	r.HandleFunc("/api/cursos", cursoHandler.GetAll).Methods("GET")
-	r.HandleFunc("/api/cursos/{id}", cursoHandler.GetByID).Methods("GET")
-	r.HandleFunc("/api/cursos", authMiddleware.Authenticate(authMiddleware.RequireRole(models.RolAdmin)(cursoHandler.Create))).Methods("POST")
-	r.HandleFunc("/api/cursos/{id}", authMiddleware.Authenticate(authMiddleware.RequireRole(models.RolAdmin)(cursoHandler.Update))).Methods("PUT")
+	r.HandleFunc("/api/asignaturas", asignaturaHandler.GetAll).Methods("GET")
+	r.HandleFunc("/api/asignaturas/{id}", asignaturaHandler.GetByID).Methods("GET")
+	r.HandleFunc("/api/asignaturas", authMiddleware.Authenticate(authMiddleware.RequireRole(models.RolAdmin)(asignaturaHandler.Create))).Methods("POST")
+	r.HandleFunc("/api/asignaturas/{id}", authMiddleware.Authenticate(authMiddleware.RequireRole(models.RolAdmin)(asignaturaHandler.Update))).Methods("PUT")
+	r.HandleFunc("/api/asignaturas/{id}", authMiddleware.Authenticate(authMiddleware.RequireRole(models.RolAdmin)(asignaturaHandler.Delete))).Methods("DELETE")
 
 	r.HandleFunc("/api/proyectos-docentes", authMiddleware.Authenticate(pdHandler.GetAll)).Methods("GET")
 	r.HandleFunc("/api/proyectos-docentes/{id}", authMiddleware.Authenticate(pdHandler.GetByID)).Methods("GET")

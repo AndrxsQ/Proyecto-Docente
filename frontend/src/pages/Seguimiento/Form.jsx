@@ -48,7 +48,7 @@ const SeguimientoForm = () => {
     try {
       const dataToSend = {
         proyecto_docente_id: parseInt(id),
-        curso_id: proyecto.curso_id,
+        asignatura_id: proyecto.asignatura_id,
         docente_id: proyecto.docente_id,
         fecha: new Date(nuevoRegistro.fecha).toISOString(),
         descripcion: nuevoRegistro.descripcion,
@@ -106,7 +106,7 @@ const SeguimientoForm = () => {
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#1E1E1E]">Seguimiento - <span className="text-[#F5A623]">{proyecto.curso?.nombre}</span></h1>
+        <h1 className="text-3xl font-bold text-[#1E1E1E]">Seguimiento - <span className="text-[#F5A623]">{proyecto.asignatura?.nombre}</span></h1>
         <button onClick={() => navigate('/seguimiento')} className="text-[#4A4A4A] hover:text-[#1E1E1E]">
           Volver
         </button>
@@ -114,7 +114,7 @@ const SeguimientoForm = () => {
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div className="flex justify-between mb-2">
-          <span className="font-semibold text-[#1E1E1E]">Avance Total del Curso</span>
+          <span className="font-semibold text-[#1E1E1E]">Avance Total de la Asignatura</span>
           <span className="font-bold text-[#1E1E1E]">{avanceTotal}%</span>
         </div>
         <div className="w-full bg-[#E5E7EB] rounded-full h-4">

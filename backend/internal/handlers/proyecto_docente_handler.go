@@ -29,8 +29,8 @@ func (h *ProyectoDocenteHandler) GetAll(w http.ResponseWriter, r *http.Request) 
 	if estado := r.URL.Query().Get("estado"); estado != "" {
 		filters["estado"] = estado
 	}
-	if cursoID := r.URL.Query().Get("curso_id"); cursoID != "" {
-		filters["curso_id"] = cursoID
+	if asignaturaID := r.URL.Query().Get("asignatura_id"); asignaturaID != "" {
+		filters["asignatura_id"] = asignaturaID
 	}
 	if docenteID := r.URL.Query().Get("docente_id"); docenteID != "" {
 		filters["docente_id"] = docenteID
@@ -78,15 +78,15 @@ func (h *ProyectoDocenteHandler) Create(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var req struct {
-		CursoID   int `json:"curso_id"`
-		DocenteID int `json:"docente_id"`
+		AsignaturaID int `json:"asignatura_id"`
+		DocenteID    int `json:"docente_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	pd, err := h.pdService.Create(req.CursoID, req.DocenteID)
+	pd, err := h.pdService.Create(req.AsignaturaID, req.DocenteID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

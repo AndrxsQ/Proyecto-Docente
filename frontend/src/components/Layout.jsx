@@ -14,7 +14,7 @@ const Layout = () => {
       { path: '/proyectos-docente', label: 'Proyectos Docente', icon: FileText, show: true },
       { path: '/seguimiento', label: 'Seguimiento', icon: ClipboardList, show: user?.rol === 'DOCENTE' || user?.rol === 'ADMIN' },
       { path: '/admin/usuarios', label: 'Usuarios', icon: User, show: user?.rol === 'ADMIN' },
-      { path: '/admin/cursos', label: 'Cursos', icon: Settings, show: user?.rol === 'ADMIN' },
+      { path: '/admin/asignaturas', label: 'Asignaturas', icon: Settings, show: user?.rol === 'ADMIN' },
       { path: '/admin/programas', label: 'Programas', icon: Settings, show: user?.rol === 'ADMIN' },
     ];
     return items.filter(item => item.show);

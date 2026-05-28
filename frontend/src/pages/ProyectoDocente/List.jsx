@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProyectosDocentes, createProyectoDocente, aprobarProyectoDocente, enviarProyectoDocente } from '../../api/proyectosDocente';
-import { getCursos } from '../../api/cursos';
+import { getAsignaturas } from '../../api/asignaturas';
 import { useAuth } from '../../context/AuthContext';
 import { Plus, Eye, Edit, Check, Send } from 'lucide-react';
 
 const ProyectoDocenteList = () => {
   const [proyectos, setProyectos] = useState([]);
-  const [cursos, setCursos] = useState([]);
+  const [asignaturas, setAsignaturas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showNewModal, setShowNewModal] = useState(false);
-  const [selectedCurso, setSelectedCurso] = useState('');
+  const [selectedAsignatura, setSelectedAsignatura] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -24,16 +24,16 @@ const ProyectoDocenteList = () => {
       if (user.rol === 'DOCENTE') {
         filters.docente_id = user.id;
       }
-      const [proyectosData, cursosData] = await Promise.all([
+      const [proyectosData, asignaturasData] = await Promise.all([
         getProyectosDocentes(filters),
-        getCursos(user.rol === 'DOCENTE' ? { docente_id: user.id } : {})
+        getAsignaturas(user.rol === 'DOCENTE' ? { docente_id: user.id } : {})
       ]);
       setProyectos(proyectosData);
-      setCursos(cursosData);
+      setAsignaturas(asignaturasData);
     } catch (error) {
       console.error('Error fetching data:', error);
       setProyectos([]);
-      setCursos([]);
+      setAsignaturas([]);
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ const ProyectoDocenteList = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await createProyectoDocente({ curso_id: parseInt(selectedCurso), docente_id: user.id });
+      await createProyectoDocente({ asignatura_id: parseInt(selectedAsignatura), docente_id: user.id });
       setShowNewModal(false);
       fetchData();
     } catch (error) {
@@ -139,7 +139,7 @@ const ProyectoDocenteList = () => {
           <table className="w-full">
             <thead>
               <tr className="bg-[#1E1E1E]">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Curso</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Asignatura</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-white">Versión</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-white">Estado</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-white">Última Modificación</th>
@@ -156,7 +156,7 @@ const ProyectoDocenteList = () => {
               ) : (
                 proyectos.map((proyecto, index) => (
                   <tr key={proyecto.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ` + (index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]')}>
-                    <td className="py-3 px-4 text-sm text-[#4A4A4A]">{proyecto.curso?.nombre}</td>
+                    <td className="py-3 px-4 text-sm text-[#4A4A4A]">{proyecto.asignatura?.nombre}</td>
                     <td className="py-3 px-4 text-sm text-[#4A4A4A]">{proyecto.version}</td>
                     <td className="py-3 px-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ` + getEstadoBadge(proyecto.estado)}>
@@ -216,17 +216,17 @@ const ProyectoDocenteList = () => {
             <h2 className="text-xl font-bold text-[#1E1E1E] mb-4">Crear Nuevo Proyecto Docente</h2>
             <form onSubmit={handleCreate}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Curso</label>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Asignatura</label>
                 <select
-                  value={selectedCurso}
-                  onChange={(e) => setSelectedCurso(e.target.value)}
+                  value={selectedAsignatura}
+                  onChange={(e) => setSelectedAsignatura(e.target.value)}
                   className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
                   required
                 >
-                  <option value="">Seleccionar curso</option>
-                  {cursos.map((curso) => (
-                    <option key={curso.id} value={curso.id}>
-                      {curso.nombre}
+                  <option value="">Seleccionar asignatura</option>
+                  {asignaturas.map((asignatura) => (
+                    <option key={asignatura.id} value={asignatura.id}>
+                      {asignatura.nombre}
                     </option>
                   ))}
                 </select>

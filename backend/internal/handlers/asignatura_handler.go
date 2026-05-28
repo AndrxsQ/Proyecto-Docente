@@ -10,15 +10,15 @@ import (
 	"proyecto-docente/internal/service"
 )
 
-type CursoHandler struct {
-	cursoService *service.CursoService
+type AsignaturaHandler struct {
+	asignaturaService *service.AsignaturaService
 }
 
-func NewCursoHandler(cursoService *service.CursoService) *CursoHandler {
-	return &CursoHandler{cursoService: cursoService}
+func NewAsignaturaHandler(asignaturaService *service.AsignaturaService) *AsignaturaHandler {
+	return &AsignaturaHandler{asignaturaService: asignaturaService}
 }
 
-func (h *CursoHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+func (h *AsignaturaHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	log.Printf("GetAll called with method: %s", r.Method)
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -37,85 +37,105 @@ func (h *CursoHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Filters: %v", filters)
 
-	cursos, err := h.cursoService.GetAll(filters)
+	asignaturas, err := h.asignaturaService.GetAll(filters)
 	if err != nil {
-		log.Printf("Error getting cursos: %v", err)
+		log.Printf("Error getting asignaturas: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("Found %d cursos", len(cursos))
+	log.Printf("Found %d asignaturas", len(asignaturas))
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(cursos)
+	json.NewEncoder(w).Encode(asignaturas)
 }
 
-func (h *CursoHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+func (h *AsignaturaHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	id, err := strconv.Atoi(r.URL.Path[len("/api/cursos/"):])
+	id, err := strconv.Atoi(r.URL.Path[len("/api/asignaturas/"):])
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
-	curso, err := h.cursoService.GetByID(id)
+	asignatura, err := h.asignaturaService.GetByID(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(curso)
+	json.NewEncoder(w).Encode(asignatura)
 }
 
-func (h *CursoHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (h *AsignaturaHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var curso models.Curso
-	if err := json.NewDecoder(r.Body).Decode(&curso); err != nil {
+	var asignatura models.Asignatura
+	if err := json.NewDecoder(r.Body).Decode(&asignatura); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	if err := h.cursoService.Create(&curso); err != nil {
+	if err := h.asignaturaService.Create(&asignatura); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(curso)
+	json.NewEncoder(w).Encode(asignatura)
 }
 
-func (h *CursoHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *AsignaturaHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	id, err := strconv.Atoi(r.URL.Path[len("/api/cursos/"):])
+	id, err := strconv.Atoi(r.URL.Path[len("/api/asignaturas/"):])
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
-	var curso models.Curso
-	if err := json.NewDecoder(r.Body).Decode(&curso); err != nil {
+	var asignatura models.Asignatura
+	if err := json.NewDecoder(r.Body).Decode(&asignatura); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	curso.ID = id
-	if err := h.cursoService.Update(&curso); err != nil {
+	asignatura.ID = id
+	if err := h.asignaturaService.Update(&asignatura); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(curso)
+	json.NewEncoder(w).Encode(asignatura)
+}
+
+func (h *AsignaturaHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	id, err := strconv.Atoi(r.URL.Path[len("/api/asignaturas/"):])
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.asignaturaService.Delete(id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

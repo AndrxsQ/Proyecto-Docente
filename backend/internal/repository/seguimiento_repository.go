@@ -15,7 +15,7 @@ func NewSeguimientoRepository(db *DB) *SeguimientoRepository {
 
 func (r *SeguimientoRepository) GetByProyectoDocenteID(pdID int) ([]models.Seguimiento, error) {
 	query := `
-		SELECT s.id, s.proyecto_docente_id, s.curso_id, s.docente_id, s.fecha,
+		SELECT s.id, s.proyecto_docente_id, s.asignatura_id, s.docente_id, s.fecha,
 		       s.desarrollo, s.descripcion, s.porcentaje_avance, s.estado, s.reporte, s.observaciones,
 		       u.nombre as docente_nombre, u.apellido as docente_apellido
 		FROM seguimiento s
@@ -35,7 +35,7 @@ func (r *SeguimientoRepository) GetByProyectoDocenteID(pdID int) ([]models.Segui
 		var reporte, observaciones sql.NullString
 		var docenteNombre, docenteApellido sql.NullString
 		if err := rows.Scan(
-			&s.ID, &s.ProyectoDocenteID, &s.CursoID, &s.DocenteID, &s.Fecha,
+			&s.ID, &s.ProyectoDocenteID, &s.AsignaturaID, &s.DocenteID, &s.Fecha,
 			&s.Desarrollo, &s.Descripcion, &s.PorcentajeAvance, &s.Estado, &reporte, &observaciones,
 			&docenteNombre, &docenteApellido,
 		); err != nil {
@@ -55,15 +55,15 @@ func (r *SeguimientoRepository) GetByProyectoDocenteID(pdID int) ([]models.Segui
 	return seguimientos, nil
 }
 
-func (r *SeguimientoRepository) GetByCursoID(cursoID int) ([]models.Seguimiento, error) {
+func (r *SeguimientoRepository) GetByAsignaturaID(asignaturaID int) ([]models.Seguimiento, error) {
 	query := `
-		SELECT s.id, s.proyecto_docente_id, s.curso_id, s.docente_id, s.fecha,
+		SELECT s.id, s.proyecto_docente_id, s.asignatura_id, s.docente_id, s.fecha,
 		       s.desarrollo, s.descripcion, s.porcentaje_avance, s.estado, s.reporte, s.observaciones
 		FROM seguimiento s
-		WHERE s.curso_id = $1
+		WHERE s.asignatura_id = $1
 		ORDER BY s.fecha
 	`
-	rows, err := r.db.Query(query, cursoID)
+	rows, err := r.db.Query(query, asignaturaID)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (r *SeguimientoRepository) GetByCursoID(cursoID int) ([]models.Seguimiento,
 		var s models.Seguimiento
 		var reporte, observaciones sql.NullString
 		if err := rows.Scan(
-			&s.ID, &s.ProyectoDocenteID, &s.CursoID, &s.DocenteID, &s.Fecha,
+			&s.ID, &s.ProyectoDocenteID, &s.AsignaturaID, &s.DocenteID, &s.Fecha,
 			&s.Desarrollo, &s.Descripcion, &s.PorcentajeAvance, &s.Estado, &reporte, &observaciones,
 		); err != nil {
 			return nil, err
@@ -95,7 +95,7 @@ func (r *SeguimientoRepository) GetByCursoID(cursoID int) ([]models.Seguimiento,
 
 func (r *SeguimientoRepository) GetByID(id int) (*models.Seguimiento, error) {
 	query := `
-		SELECT id, proyecto_docente_id, curso_id, docente_id, fecha,
+		SELECT id, proyecto_docente_id, asignatura_id, docente_id, fecha,
 		       desarrollo, descripcion, porcentaje_avance, estado, reporte, observaciones
 		FROM seguimiento
 		WHERE id = $1
@@ -105,7 +105,7 @@ func (r *SeguimientoRepository) GetByID(id int) (*models.Seguimiento, error) {
 	var s models.Seguimiento
 	var reporte, observaciones sql.NullString
 	err := row.Scan(
-		&s.ID, &s.ProyectoDocenteID, &s.CursoID, &s.DocenteID, &s.Fecha,
+		&s.ID, &s.ProyectoDocenteID, &s.AsignaturaID, &s.DocenteID, &s.Fecha,
 		&s.Desarrollo, &s.Descripcion, &s.PorcentajeAvance, &s.Estado, &reporte, &observaciones,
 	)
 	if err == sql.ErrNoRows {
@@ -127,11 +127,11 @@ func (r *SeguimientoRepository) GetByID(id int) (*models.Seguimiento, error) {
 
 func (r *SeguimientoRepository) Create(seguimiento *models.Seguimiento) error {
 	query := `
-		INSERT INTO seguimiento (proyecto_docente_id, curso_id, docente_id, fecha, desarrollo,
+		INSERT INTO seguimiento (proyecto_docente_id, asignatura_id, docente_id, fecha, desarrollo,
 		                         descripcion, porcentaje_avance, estado, reporte, observaciones)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
 	`
-	return r.db.QueryRow(query, seguimiento.ProyectoDocenteID, seguimiento.CursoID,
+	return r.db.QueryRow(query, seguimiento.ProyectoDocenteID, seguimiento.AsignaturaID,
 		seguimiento.DocenteID, seguimiento.Fecha, seguimiento.Desarrollo,
 		seguimiento.Descripcion, seguimiento.PorcentajeAvance, seguimiento.Estado,
 		seguimiento.Reporte, seguimiento.Observaciones).Scan(&seguimiento.ID)

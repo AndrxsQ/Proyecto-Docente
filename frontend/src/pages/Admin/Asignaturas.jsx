@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { getCursos, createCurso, updateCurso } from '../../api/cursos';
+import { getAsignaturas, createAsignatura, updateAsignatura } from '../../api/asignaturas';
 import { getProgramas } from '../../api/programas';
 import { Plus, Edit } from 'lucide-react';
 
-const AdminCursos = () => {
-  const [cursos, setCursos] = useState([]);
+const AdminAsignaturas = () => {
+  const [asignaturas, setAsignaturas] = useState([]);
   const [programas, setProgramas] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingCurso, setEditingCurso] = useState(null);
+  const [editingAsignatura, setEditingAsignatura] = useState(null);
   const [formData, setFormData] = useState({
     nombre: '',
     componente: '',
@@ -27,11 +27,11 @@ const AdminCursos = () => {
 
   const fetchData = async () => {
     try {
-      const [cursosData, programasData] = await Promise.all([
-        getCursos(),
+      const [asignaturasData, programasData] = await Promise.all([
+        getAsignaturas(),
         getProgramas()
       ]);
-      setCursos(cursosData);
+      setAsignaturas(asignaturasData);
       setProgramas(programasData);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -48,13 +48,13 @@ const AdminCursos = () => {
         programa_id: parseInt(formData.programa_id),
         docente_id: formData.docente_id ? parseInt(formData.docente_id) : null
       };
-      if (editingCurso) {
-        await updateCurso(editingCurso.id, data);
+      if (editingAsignatura) {
+        await updateAsignatura(editingAsignatura.id, data);
       } else {
-        await createCurso(data);
+        await createAsignatura(data);
       }
       setShowModal(false);
-      setEditingCurso(null);
+      setEditingAsignatura(null);
       setFormData({
         nombre: '',
         componente: '',
@@ -69,23 +69,23 @@ const AdminCursos = () => {
       });
       fetchData();
     } catch (error) {
-      console.error('Error saving curso:', error);
+      console.error('Error saving asignatura:', error);
     }
   };
 
-  const handleEdit = (curso) => {
-    setEditingCurso(curso);
+  const handleEdit = (asignatura) => {
+    setEditingAsignatura(asignatura);
     setFormData({
-      nombre: curso.nombre,
-      componente: curso.componente,
-      creditos: curso.creditos,
-      total_horas: curso.total_horas,
-      tipo: curso.tipo,
-      prerrequisitos: curso.prerrequisitos,
-      correquisitos: curso.correquisitos,
-      periodo_academico: curso.periodo_academico,
-      programa_id: curso.programa_id,
-      docente_id: curso.docente_id || ''
+      nombre: asignatura.nombre,
+      componente: asignatura.componente,
+      creditos: asignatura.creditos,
+      total_horas: asignatura.total_horas,
+      tipo: asignatura.tipo,
+      prerrequisitos: asignatura.prerrequisitos,
+      correquisitos: asignatura.correquisitos,
+      periodo_academico: asignatura.periodo_academico,
+      programa_id: asignatura.programa_id,
+      docente_id: asignatura.docente_id || ''
     });
     setShowModal(true);
   };
@@ -93,13 +93,13 @@ const AdminCursos = () => {
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#1E1E1E]">Gestión de <span className="text-[#F5A623]">Cursos</span></h1>
+        <h1 className="text-3xl font-bold text-[#1E1E1E]">Gestión de <span className="text-[#F5A623]">Asignaturas</span></h1>
         <button
-          onClick={() => { setShowModal(true); setEditingCurso(null); }}
+          onClick={() => { setShowModal(true); setEditingAsignatura(null); }}
           className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Nuevo Curso
+          Nueva Asignatura
         </button>
       </div>
 
@@ -117,16 +117,16 @@ const AdminCursos = () => {
               </tr>
             </thead>
             <tbody>
-              {cursos.map((curso, index) => (
-                <tr key={curso.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ` + (index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]')}>
-                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.nombre}</td>
-                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.componente}</td>
-                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.creditos}</td>
-                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.tipo}</td>
-                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{curso.periodo_academico}</td>
+              {asignaturas.map((asignatura, index) => (
+                <tr key={asignatura.id} className={`border-b border-[#F0F0F0] hover:bg-[#FFF8EC] ` + (index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]')}>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{asignatura.nombre}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{asignatura.componente}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{asignatura.creditos}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{asignatura.tipo}</td>
+                  <td className="py-3 px-4 text-sm text-[#4A4A4A]">{asignatura.periodo_academico}</td>
                   <td className="py-3 px-4">
                     <button
-                      onClick={() => handleEdit(curso)}
+                      onClick={() => handleEdit(asignatura)}
                       className="p-2 hover:bg-[#F0F0F0] rounded-lg text-[#4A4A4A]"
                     >
                       <Edit className="w-4 h-4" />
@@ -143,7 +143,7 @@ const AdminCursos = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
           <div className="bg-white p-6 rounded-xl w-full max-w-2xl m-4 shadow-lg">
             <h2 className="text-xl font-bold text-[#1E1E1E] mb-4">
-              {editingCurso ? 'Editar Curso' : 'Nuevo Curso'}
+              {editingAsignatura ? 'Editar Asignatura' : 'Nueva Asignatura'}
             </h2>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
@@ -263,4 +263,4 @@ const AdminCursos = () => {
   );
 };
 
-export default AdminCursos;
+export default AdminAsignaturas;

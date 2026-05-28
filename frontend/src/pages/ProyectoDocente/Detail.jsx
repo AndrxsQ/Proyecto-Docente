@@ -42,7 +42,7 @@ const ProyectoDocenteDetail = () => {
         Volver
       </button>
 
-      <h1 className="text-3xl font-bold text-[#1E1E1E] mb-6">{proyecto.curso?.nombre}</h1>
+      <h1 className="text-3xl font-bold text-[#1E1E1E] mb-6">{proyecto.asignatura?.nombre}</h1>
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -56,7 +56,7 @@ const ProyectoDocenteDetail = () => {
             <span className="text-[#7A7A7A] text-sm">Docente:</span> <span className="text-[#1E1E1E] font-medium">{proyecto.docente?.nombre} {proyecto.docente?.apellido}</span>
           </div>
           <div>
-            <span className="text-[#7A7A7A] text-sm">Créditos:</span> <span className="text-[#1E1E1E] font-medium">{proyecto.curso?.creditos}</span>
+            <span className="text-[#7A7A7A] text-sm">Créditos:</span> <span className="text-[#1E1E1E] font-medium">{proyecto.asignatura?.creditos}</span>
           </div>
         </div>
       </div>
@@ -76,7 +76,7 @@ const ProyectoDocenteDetail = () => {
 
       {proyecto.contenido && proyecto.contenido.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-          <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Contenido del Curso</h3>
+          <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Contenido de la Asignatura</h3>
           {proyecto.contenido.map((item) => (
             <div key={item.id} className="border-b border-[#F0F0F0] py-3">
               <p className="font-semibold text-[#1E1E1E]">Semana {item.semana}: {item.tema}</p>

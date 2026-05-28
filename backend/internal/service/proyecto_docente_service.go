@@ -62,14 +62,14 @@ func (s *ProyectoDocenteService) GetByID(id int) (*models.ProyectoDocente, error
 	return pd, nil
 }
 
-func (s *ProyectoDocenteService) Create(cursoID, docenteID int) (*models.ProyectoDocente, error) {
-	version, err := s.pdRepo.GetNextVersion(cursoID)
+func (s *ProyectoDocenteService) Create(asignaturaID, docenteID int) (*models.ProyectoDocente, error) {
+	version, err := s.pdRepo.GetNextVersion(asignaturaID)
 	if err != nil {
 		return nil, err
 	}
 
 	pd := &models.ProyectoDocente{
-		CursoID:            cursoID,
+		AsignaturaID:       asignaturaID,
 		Version:            version,
 		Estado:             models.EstadoElaborado,
 		Creacion:           time.Now(),
@@ -210,7 +210,7 @@ func (s *ProyectoDocenteService) validarRequisitos(pdID int) error {
 		return err
 	}
 	if len(contenido) == 0 {
-		return errors.New("falta agregar contenido del curso (al menos una semana)")
+		return errors.New("falta agregar contenido de la asignatura (al menos una semana)")
 	}
 
 	bibliografia, err := s.bibliografiaRepo.GetByProyectoDocenteID(pdID)
