@@ -140,6 +140,31 @@ type Asignatura struct {
 	Docente          *Usuario           `json:"docente,omitempty"`
 }
 
+type ResultadoAprendizaje struct {
+	ID          int                `json:"id"`
+	ProgramaID  int                `json:"programa_id"`
+	Codigo      string             `json:"codigo"`
+	Descripcion string             `json:"descripcion"`
+	Programa    *ProgramaAcademico `json:"programa,omitempty"`
+}
+
+type ResultadoAprendizajeAsignatura struct {
+	ID                     int                   `json:"id"`
+	ResultadoAprendizajeID int                   `json:"resultado_aprendizaje_id"`
+	AsignaturaID           int                   `json:"asignatura_id"`
+	ResultadoAprendizaje   *ResultadoAprendizaje `json:"resultado_aprendizaje,omitempty"`
+	Asignatura             *Asignatura           `json:"asignatura,omitempty"`
+}
+
+type ResultadoAprendizajeCurso struct {
+	ID                     int                   `json:"id"`
+	ProyectoDocenteID      int                   `json:"proyecto_docente_id"`
+	ResultadoAprendizajeID *int                  `json:"resultado_aprendizaje_id,omitempty"`
+	ResultadoCurso         string                `json:"resultado_curso"`
+	ContribucionPrograma   string                `json:"contribucion_programa"`
+	ResultadoAprendizaje   *ResultadoAprendizaje `json:"resultado_aprendizaje,omitempty"`
+}
+
 type Usuario struct {
 	ID           int                `json:"id"`
 	Nombre       string             `json:"nombre"`

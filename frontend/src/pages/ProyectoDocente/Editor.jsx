@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProyectoDocente, getFormato, saveFormato, getContenido, createContenido, updateContenido, deleteContenido, getBibliografia, createBibliografia, updateBibliografia, deleteBibliografia, enviarProyectoDocente } from '../../api/proyectosDocente';
+import { getResultadosAprendizajeByAsignatura } from '../../api/resultadosAprendizaje';
+import { getResultadosAprendizajeCurso, createResultadoAprendizajeCurso, updateResultadoAprendizajeCurso, deleteResultadoAprendizajeCurso } from '../../api/resultadosAprendizajeCurso';
 import { Save, Send, Plus, Trash2 } from 'lucide-react';
 
 const ProyectoDocenteEditor = () => {
@@ -10,6 +12,8 @@ const ProyectoDocenteEditor = () => {
   const [formato, setFormato] = useState({});
   const [contenido, setContenido] = useState([]);
   const [bibliografia, setBibliografia] = useState([]);
+  const [resultadosAprendizaje, setResultadosAprendizaje] = useState([]);
+  const [resultadosAprendizajeCurso, setResultadosAprendizajeCurso] = useState([]);
   const [activeTab, setActiveTab] = useState('Información');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -76,6 +80,10 @@ const ProyectoDocenteEditor = () => {
       setProyecto(proyectoData);
       setFormato(formatoData || {});
       
+      // Fetch resultados de aprendizaje for the asignatura
+      const resultadosAprendizajeData = await getResultadosAprendizajeByAsignatura(proyectoData.asignatura_id);
+      const resultadosAprendizajeCursoData = await getResultadosAprendizajeCurso(id);
+      
       // Auto-generate weeks based on asignatura.semanas if no contenido exists
       const numSemanas = proyectoData?.asignatura?.semanas || 16;
       if (!contenidoData || contenidoData.length === 0) {
@@ -91,10 +99,14 @@ const ProyectoDocenteEditor = () => {
       }
       
       setBibliografia((bibliografiaData || []).filter(b => b.referencia));
+      setResultadosAprendizaje(resultadosAprendizajeData || []);
+      setResultadosAprendizajeCurso((resultadosAprendizajeCursoData || []).filter(r => r.contribucion_programa));
     } catch (error) {
       console.error('Error fetching data:', error);
       setContenido([]);
       setBibliografia([]);
+      setResultadosAprendizaje([]);
+      setResultadosAprendizajeCurso([]);
     } finally {
       setLoading(false);
     }
@@ -162,6 +174,43 @@ const ProyectoDocenteEditor = () => {
     }
   };
 
+  const handleAddResultadoAprendizajeCurso = async () => {
+    const newResultado = {
+      proyecto_docente_id: proyecto.id,
+      resultado_aprendizaje_id: null,
+      resultado_curso: '',
+      contribucion_programa: ''
+    };
+    setResultadosAprendizajeCurso([...resultadosAprendizajeCurso, { ...newResultado, id: Date.now() }]);
+  };
+
+  const handleUpdateResultadoAprendizajeCurso = async (item) => {
+    setResultadosAprendizajeCurso(resultadosAprendizajeCurso.map(r => r.id === item.id ? item : r));
+    if (item.resultado_aprendizaje_id && item.contribucion_programa) {
+      try {
+        if (typeof item.id === 'number' && item.id < 1000000) {
+          await updateResultadoAprendizajeCurso(item);
+        } else {
+          const response = await createResultadoAprendizajeCurso(item);
+          setResultadosAprendizajeCurso(resultadosAprendizajeCurso.map(r => r.id === item.id ? { ...item, id: response.id } : r));
+        }
+      } catch (error) {
+        console.error('Error saving resultado aprendizaje curso:', error);
+      }
+    }
+  };
+
+  const handleDeleteResultadoAprendizajeCurso = async (itemId) => {
+    try {
+      if (typeof itemId === 'number' && itemId < 1000000) {
+        await deleteResultadoAprendizajeCurso(itemId);
+      }
+      setResultadosAprendizajeCurso(resultadosAprendizajeCurso.filter(r => r.id !== itemId));
+    } catch (error) {
+      console.error('Error deleting resultado aprendizaje curso:', error);
+    }
+  };
+
   const handleEnviar = async () => {
     // Validate all fields before sending
     const errors = [];
@@ -174,9 +223,18 @@ const ProyectoDocenteEditor = () => {
       errors.push('Las estrategias metodológicas son obligatorias');
     }
     
-    // Validate Resultados tab
-    if (!formato.resultados_aprendizaje || formato.resultados_aprendizaje.trim() === '') {
-      errors.push('La contribución a los resultados de aprendizaje es obligatoria');
+    // Validate Resultados tab - all contributions must have resultado_aprendizaje_id and contribucion_programa
+    if (!resultadosAprendizajeCurso || resultadosAprendizajeCurso.length === 0) {
+      errors.push('Las contribuciones a los resultados de aprendizaje son obligatorias');
+    } else {
+      resultadosAprendizajeCurso.forEach((item) => {
+        if (!item.resultado_aprendizaje_id) {
+          errors.push('Cada contribución debe estar vinculada a un resultado de aprendizaje');
+        }
+        if (!item.contribucion_programa || item.contribucion_programa.trim() === '') {
+          errors.push('La descripción de la contribución es obligatoria');
+        }
+      });
     }
     
     // Validate Contenido tab - all weeks must have tema and descripcion
@@ -368,13 +426,53 @@ const ProyectoDocenteEditor = () => {
 
         {activeTab === 'Resultados' && (
           <div>
-            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Contribución a los Resultados de Aprendizaje</label>
-            <textarea
-              value={formato.resultados_aprendizaje || ''}
-              onChange={(e) => setFormato({ ...formato, resultados_aprendizaje: e.target.value })}
-              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-64"
-              placeholder="Liste las contribuciones a los resultados de aprendizaje de la asignatura"
-            />
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-[#1E1E1E]">Contribuciones a los Resultados de Aprendizaje</h3>
+              <button onClick={handleAddResultadoAprendizajeCurso} className="flex items-center text-[#F5A623] font-semibold hover:text-[#E09415]">
+                <Plus className="w-4 h-4 mr-1" />
+                Agregar Contribución
+              </button>
+            </div>
+            <div className="space-y-4">
+              {!resultadosAprendizajeCurso || resultadosAprendizajeCurso.length === 0 ? (
+                <p className="text-[#4A4A4A]">No hay contribuciones para mostrar</p>
+              ) : (
+                resultadosAprendizajeCurso.map((item) => (
+                  <div key={item.id} className="border border-[#F0F0F0] p-4 rounded-xl">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-semibold text-[#1E1E1E]">Contribución</span>
+                      <button onClick={() => handleDeleteResultadoAprendizajeCurso(item.id)} className="text-[#E53E3E] hover:text-[#C53030]">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="mb-2">
+                      <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Resultado de Aprendizaje</label>
+                      <select
+                        value={item.resultado_aprendizaje_id || ''}
+                        onChange={(e) => handleUpdateResultadoAprendizajeCurso({ ...item, resultado_aprendizaje_id: e.target.value ? parseInt(e.target.value) : null })}
+                        className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
+                      >
+                        <option value="">Seleccione un resultado de aprendizaje</option>
+                        {resultadosAprendizaje.map((ra) => (
+                          <option key={ra.id} value={ra.id}>
+                            {ra.codigo} - {ra.descripcion}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Descripción de la Contribución</label>
+                      <textarea
+                        value={item.contribucion_programa || ''}
+                        onChange={(e) => handleUpdateResultadoAprendizajeCurso({ ...item, contribucion_programa: e.target.value })}
+                        className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-20"
+                        placeholder="Describa cómo la asignatura contribuye a este resultado de aprendizaje"
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         )}
 

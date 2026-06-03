@@ -9,11 +9,12 @@ import (
 )
 
 type ProyectoDocenteService struct {
-	pdRepo           *repository.ProyectoDocenteRepository
-	formatoRepo      *repository.FormatoRepository
-	contenidoRepo    *repository.ContenidoRepository
-	bibliografiaRepo *repository.BibliografiaRepository
-	observacionRepo  *repository.ObservacionRepository
+	pdRepo                        *repository.ProyectoDocenteRepository
+	formatoRepo                   *repository.FormatoRepository
+	contenidoRepo                 *repository.ContenidoRepository
+	bibliografiaRepo              *repository.BibliografiaRepository
+	observacionRepo               *repository.ObservacionRepository
+	resultadoAprendizajeCursoRepo *repository.ResultadoAprendizajeCursoRepository
 }
 
 func NewProyectoDocenteService(
@@ -22,13 +23,15 @@ func NewProyectoDocenteService(
 	contenidoRepo *repository.ContenidoRepository,
 	bibliografiaRepo *repository.BibliografiaRepository,
 	observacionRepo *repository.ObservacionRepository,
+	resultadoAprendizajeCursoRepo *repository.ResultadoAprendizajeCursoRepository,
 ) *ProyectoDocenteService {
 	return &ProyectoDocenteService{
-		pdRepo:           pdRepo,
-		formatoRepo:      formatoRepo,
-		contenidoRepo:    contenidoRepo,
-		bibliografiaRepo: bibliografiaRepo,
-		observacionRepo:  observacionRepo,
+		pdRepo:                        pdRepo,
+		formatoRepo:                   formatoRepo,
+		contenidoRepo:                 contenidoRepo,
+		bibliografiaRepo:              bibliografiaRepo,
+		observacionRepo:               observacionRepo,
+		resultadoAprendizajeCursoRepo: resultadoAprendizajeCursoRepo,
 	}
 }
 
@@ -201,8 +204,26 @@ func (s *ProyectoDocenteService) validarRequisitos(pdID int) error {
 	if err != nil {
 		return err
 	}
-	if formato == nil || formato.ResultadosAprendizaje == "" || formato.EvaluacionResultados == "" {
-		return errors.New("falta completar resultados de aprendizaje y criterios de evaluación")
+	if formato == nil || formato.EvaluacionResultados == "" {
+		return errors.New("falta completar criterios de evaluación")
+	}
+
+	// Validate resultados de aprendizaje using the new structure
+	resultadosAprendizajeCurso, err := s.resultadoAprendizajeCursoRepo.GetByProyectoDocenteID(pdID)
+	if err != nil {
+		return err
+	}
+	if len(resultadosAprendizajeCurso) == 0 {
+		return errors.New("falta agregar contribuciones a los resultados de aprendizaje")
+	}
+	// Check that each contribution has both resultado_aprendizaje_id and contribucion_programa
+	for _, rac := range resultadosAprendizajeCurso {
+		if rac.ResultadoAprendizajeID == nil || *rac.ResultadoAprendizajeID == 0 {
+			return errors.New("cada contribución debe estar vinculada a un resultado de aprendizaje")
+		}
+		if rac.ContribucionPrograma == "" {
+			return errors.New("cada contribución debe tener una descripción")
+		}
 	}
 
 	contenido, err := s.contenidoRepo.GetByProyectoDocenteID(pdID)

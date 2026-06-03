@@ -70,9 +70,15 @@ func main() {
 	seguimientoService := service.NewSeguimientoService(seguimientoRepo)
 	seguimientoHandler := handlers.NewSeguimientoHandler(seguimientoService)
 
+	resultadoAprendizajeRepo := repository.NewResultadoAprendizajeRepository(db)
+	resultadoAprendizajeHandler := handlers.NewResultadoAprendizajeHandler(resultadoAprendizajeRepo)
+
+	resultadoAprendizajeCursoRepo := repository.NewResultadoAprendizajeCursoRepository(db)
+	resultadoAprendizajeCursoHandler := handlers.NewResultadoAprendizajeCursoHandler(resultadoAprendizajeCursoRepo)
+
 	pdRepo := repository.NewProyectoDocenteRepository(db)
 	observacionRepo := repository.NewObservacionRepository(db)
-	pdService := service.NewProyectoDocenteService(pdRepo, formatoRepo, contenidoRepo, bibliografiaRepo, observacionRepo)
+	pdService := service.NewProyectoDocenteService(pdRepo, formatoRepo, contenidoRepo, bibliografiaRepo, observacionRepo, resultadoAprendizajeCursoRepo)
 	pdHandler := handlers.NewProyectoDocenteHandler(pdService)
 
 	authHandler := handlers.NewAuthHandler(authService)
@@ -126,6 +132,16 @@ func main() {
 	r.HandleFunc("/api/proyectos-docentes/{id}/seguimiento", authMiddleware.Authenticate(seguimientoHandler.GetByProyectoDocenteID)).Methods("GET")
 	r.HandleFunc("/api/proyectos-docentes/{id}/seguimiento", authMiddleware.Authenticate(seguimientoHandler.Create)).Methods("POST")
 	r.HandleFunc("/api/proyectos-docentes/{id}/seguimiento/{seg_id}", authMiddleware.Authenticate(seguimientoHandler.Update)).Methods("PUT")
+
+	r.HandleFunc("/api/resultados-aprendizaje", authMiddleware.Authenticate(resultadoAprendizajeHandler.GetByAsignatura)).Methods("GET")
+	r.HandleFunc("/api/resultados-aprendizaje", authMiddleware.Authenticate(resultadoAprendizajeHandler.Create)).Methods("POST")
+	r.HandleFunc("/api/resultados-aprendizaje", authMiddleware.Authenticate(resultadoAprendizajeHandler.Update)).Methods("PUT")
+	r.HandleFunc("/api/resultados-aprendizaje", authMiddleware.Authenticate(resultadoAprendizajeHandler.Delete)).Methods("DELETE")
+
+	r.HandleFunc("/api/resultados-aprendizaje-curso", authMiddleware.Authenticate(resultadoAprendizajeCursoHandler.GetByProyectoDocente)).Methods("GET")
+	r.HandleFunc("/api/resultados-aprendizaje-curso", authMiddleware.Authenticate(resultadoAprendizajeCursoHandler.Create)).Methods("POST")
+	r.HandleFunc("/api/resultados-aprendizaje-curso", authMiddleware.Authenticate(resultadoAprendizajeCursoHandler.Update)).Methods("PUT")
+	r.HandleFunc("/api/resultados-aprendizaje-curso", authMiddleware.Authenticate(resultadoAprendizajeCursoHandler.Delete)).Methods("DELETE")
 
 	handler := corsMiddleware(r)
 
