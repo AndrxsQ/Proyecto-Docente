@@ -12,7 +12,7 @@ const SeguimientoForm = () => {
     fecha: new Date().toISOString().split('T')[0],
     descripcion: '',
     desarrollo: '',
-    porcentaje_avance: 0,
+    porcentaje_avance: 1,
     estado: 'CUMPLIDO',
     observaciones: ''
   });
@@ -63,7 +63,7 @@ const SeguimientoForm = () => {
         fecha: new Date().toISOString().split('T')[0],
         descripcion: '',
         desarrollo: '',
-        porcentaje_avance: 0,
+        porcentaje_avance: 1,
         estado: 'CUMPLIDO',
         observaciones: ''
       });
@@ -163,18 +163,6 @@ const SeguimientoForm = () => {
               value={nuevoRegistro.desarrollo}
               onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, desarrollo: e.target.value })}
               className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-24"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Porcentaje de Avance (%)</label>
-            <input
-              type="number"
-              min="0"
-              max="100"
-              value={nuevoRegistro.porcentaje_avance}
-              onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, porcentaje_avance: parseInt(e.target.value) || 0 })}
-              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
-              required
             />
           </div>
           <div className="md:col-span-2">
