@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getProyectoDocente, getSeguimiento } from '../../api/proyectosDocente';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 
 const SeguimientoDetail = () => {
   const { id } = useParams();
@@ -55,9 +55,18 @@ const SeguimientoDetail = () => {
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-[#1E1E1E]">Seguimiento - <span className="text-[#F5A623]">{proyecto.asignatura?.nombre}</span></h1>
-        <button onClick={() => navigate('/seguimiento', { state: { filters: location.state?.filters } })} className="text-[#4A4A4A] hover:text-[#1E1E1E]">
-          <ArrowLeft className="w-6 h-6" />
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => navigate(`/seguimiento/${id}`, { state: { filters: location.state?.filters } })}
+            className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Registro
+          </button>
+          <button onClick={() => navigate('/seguimiento', { state: { filters: location.state?.filters } })} className="text-[#4A4A4A] hover:text-[#1E1E1E]">
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
