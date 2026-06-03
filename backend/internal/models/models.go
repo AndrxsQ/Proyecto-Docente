@@ -214,6 +214,7 @@ type ContenidoCurso struct {
 	ID                int     `json:"id"`
 	ProyectoDocenteID int     `json:"proyecto_docente_id"`
 	Semana            int     `json:"semana"`
+	Sesion            int     `json:"sesion"`
 	Tema              string  `json:"tema"`
 	Descripcion       string  `json:"descripcion"`
 	Fecha             *string `json:"fecha"`

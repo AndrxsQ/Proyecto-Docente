@@ -15,10 +15,10 @@ func NewContenidoRepository(db *DB) *ContenidoRepository {
 
 func (r *ContenidoRepository) GetByProyectoDocenteID(pdID int) ([]models.ContenidoCurso, error) {
 	query := `
-		SELECT id, proyecto_docente_id, semana, tema, descripcion, observaciones
+		SELECT id, proyecto_docente_id, semana, sesion, tema, descripcion, observaciones
 		FROM contenido_curso
 		WHERE proyecto_docente_id = $1
-		ORDER BY semana
+		ORDER BY semana, sesion
 	`
 	rows, err := r.db.Query(query, pdID)
 	if err != nil {
@@ -31,7 +31,7 @@ func (r *ContenidoRepository) GetByProyectoDocenteID(pdID int) ([]models.Conteni
 		var c models.ContenidoCurso
 		var observaciones sql.NullString
 		if err := rows.Scan(
-			&c.ID, &c.ProyectoDocenteID, &c.Semana, &c.Tema, &c.Descripcion,
+			&c.ID, &c.ProyectoDocenteID, &c.Semana, &c.Sesion, &c.Tema, &c.Descripcion,
 			&observaciones,
 		); err != nil {
 			return nil, err
@@ -49,7 +49,7 @@ func (r *ContenidoRepository) GetByProyectoDocenteID(pdID int) ([]models.Conteni
 
 func (r *ContenidoRepository) GetByID(id int) (*models.ContenidoCurso, error) {
 	query := `
-		SELECT id, proyecto_docente_id, semana, tema, descripcion, observaciones
+		SELECT id, proyecto_docente_id, semana, sesion, tema, descripcion, observaciones
 		FROM contenido_curso
 		WHERE id = $1
 	`
@@ -58,7 +58,7 @@ func (r *ContenidoRepository) GetByID(id int) (*models.ContenidoCurso, error) {
 	var c models.ContenidoCurso
 	var observaciones sql.NullString
 	err := row.Scan(
-		&c.ID, &c.ProyectoDocenteID, &c.Semana, &c.Tema, &c.Descripcion,
+		&c.ID, &c.ProyectoDocenteID, &c.Semana, &c.Sesion, &c.Tema, &c.Descripcion,
 		&observaciones,
 	)
 	if err == sql.ErrNoRows {
@@ -77,20 +77,20 @@ func (r *ContenidoRepository) GetByID(id int) (*models.ContenidoCurso, error) {
 
 func (r *ContenidoRepository) Create(contenido *models.ContenidoCurso) error {
 	query := `
-		INSERT INTO contenido_curso (proyecto_docente_id, semana, tema, descripcion, observaciones)
-		VALUES ($1, $2, $3, $4, $5) RETURNING id
+		INSERT INTO contenido_curso (proyecto_docente_id, semana, sesion, tema, descripcion, observaciones)
+		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
 	`
-	return r.db.QueryRow(query, contenido.ProyectoDocenteID, contenido.Semana,
+	return r.db.QueryRow(query, contenido.ProyectoDocenteID, contenido.Semana, contenido.Sesion,
 		contenido.Tema, contenido.Descripcion, contenido.Observaciones).Scan(&contenido.ID)
 }
 
 func (r *ContenidoRepository) Update(contenido *models.ContenidoCurso) error {
 	query := `
 		UPDATE contenido_curso
-		SET semana = $1, tema = $2, descripcion = $3, observaciones = $4
-		WHERE id = $5
+		SET semana = $1, sesion = $2, tema = $3, descripcion = $4, observaciones = $5
+		WHERE id = $6
 	`
-	_, err := r.db.Exec(query, contenido.Semana, contenido.Tema, contenido.Descripcion,
+	_, err := r.db.Exec(query, contenido.Semana, contenido.Sesion, contenido.Tema, contenido.Descripcion,
 		contenido.Observaciones, contenido.ID)
 	return err
 }

@@ -86,13 +86,20 @@ const ProyectoDocenteEditor = () => {
       
       // Auto-generate weeks based on asignatura.semanas if no contenido exists
       const numSemanas = proyectoData?.asignatura?.semanas || 16;
+      const sesionesPorSemana = proyectoData?.sesiones_por_semana || 1;
       if (!contenidoData || contenidoData.length === 0) {
-        const generatedContenido = Array.from({ length: numSemanas }, (_, i) => ({
-          id: Date.now() + i,
-          semana: i + 1,
-          tema: '',
-          descripcion: ''
-        }));
+        const generatedContenido = [];
+        for (let semana = 1; semana <= numSemanas; semana++) {
+          for (let sesion = 1; sesion <= sesionesPorSemana; sesion++) {
+            generatedContenido.push({
+              id: Date.now() + (semana * 100) + sesion,
+              semana: semana,
+              sesion: sesion,
+              tema: '',
+              descripcion: ''
+            });
+          }
+        }
         setContenido(generatedContenido);
       } else {
         setContenido((contenidoData || []).filter(c => c.tema && c.descripcion));
@@ -237,16 +244,16 @@ const ProyectoDocenteEditor = () => {
       });
     }
     
-    // Validate Contenido tab - all weeks must have tema and descripcion
+    // Validate Contenido tab - all sessions must have tema and descripcion
     if (!contenido || contenido.length === 0) {
       errors.push('El contenido del curso es obligatorio');
     } else {
       contenido.forEach((item, index) => {
         if (!item.tema || item.tema.trim() === '') {
-          errors.push(`El tema de la semana ${item.semana} es obligatorio`);
+          errors.push(`El tema de la semana ${item.semana}, sesión ${item.sesion} es obligatorio`);
         }
         if (!item.descripcion || item.descripcion.trim() === '') {
-          errors.push(`La descripción de la semana ${item.semana} es obligatoria`);
+          errors.push(`La descripción de la semana ${item.semana}, sesión ${item.sesion} es obligatoria`);
         }
       });
     }
@@ -481,30 +488,50 @@ const ProyectoDocenteEditor = () => {
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-[#1E1E1E]">Contenido del Curso/Asignatura</h3>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {!contenido || contenido.length === 0 ? (
                 <p className="text-[#4A4A4A]">No hay contenido para mostrar</p>
               ) : (
-                contenido.map((item) => (
-                  <div key={item.id} className="border border-[#F0F0F0] p-4 rounded-xl">
-                    <div className="mb-2">
-                      <span className="font-semibold text-[#1E1E1E]">Semana {item.semana}</span>
+                (() => {
+                  // Group content by week
+                  const groupedByWeek = {};
+                  contenido.forEach((item) => {
+                    if (!groupedByWeek[item.semana]) {
+                      groupedByWeek[item.semana] = [];
+                    }
+                    groupedByWeek[item.semana].push(item);
+                  });
+
+                  return Object.keys(groupedByWeek).sort((a, b) => parseInt(a) - parseInt(b)).map((weekNum) => (
+                    <div key={weekNum} className="border border-[#F0F0F0] p-4 rounded-xl">
+                      <div className="mb-4">
+                        <span className="font-semibold text-[#1E1E1E] text-lg">Semana {weekNum}</span>
+                      </div>
+                      <div className="space-y-4">
+                        {groupedByWeek[weekNum].sort((a, b) => a.sesion - b.sesion).map((item) => (
+                          <div key={item.id} className="border-l-4 border-[#F5A623] pl-4">
+                            <div className="mb-2">
+                              <span className="font-medium text-[#2C2C2C]">Sesión {item.sesion}</span>
+                            </div>
+                            <input
+                              type="text"
+                              value={item.tema}
+                              onChange={(e) => handleUpdateContenido({ ...item, tema: e.target.value })}
+                              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] mb-2"
+                              placeholder="Tema"
+                            />
+                            <textarea
+                              value={item.descripcion}
+                              onChange={(e) => handleUpdateContenido({ ...item, descripcion: e.target.value })}
+                              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-20"
+                              placeholder="Descripción"
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      value={item.tema}
-                      onChange={(e) => handleUpdateContenido({ ...item, tema: e.target.value })}
-                      className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] mb-2"
-                      placeholder="Tema"
-                    />
-                    <textarea
-                      value={item.descripcion}
-                      onChange={(e) => handleUpdateContenido({ ...item, descripcion: e.target.value })}
-                      className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-20"
-                      placeholder="Descripción"
-                    />
-                  </div>
-                ))
+                  ));
+                })()
               )}
             </div>
           </div>
