@@ -8,6 +8,7 @@ import ProyectoDocenteReview from './pages/ProyectoDocente/Review';
 import ProyectoDocenteDetail from './pages/ProyectoDocente/Detail';
 import SeguimientoList from './pages/Seguimiento/List';
 import SeguimientoForm from './pages/Seguimiento/Form';
+import SeguimientoDetail from './pages/Seguimiento/Detail';
 import AdminUsuarios from './pages/Admin/Usuarios';
 import AdminAsignaturas from './pages/Admin/Asignaturas';
 import AdminProgramas from './pages/Admin/Programas';
@@ -43,6 +44,7 @@ function App() {
             <Route path="proyectos-docente/:id" element={<ProyectoDocenteDetail />} />
             <Route path="seguimiento" element={<SeguimientoList />} />
             <Route path="seguimiento/:id" element={<SeguimientoForm />} />
+            <Route path="seguimiento/:id/detail" element={<SeguimientoDetail />} />
             <Route path="admin/usuarios" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminUsuarios /></ProtectedRoute>} />
             <Route path="admin/asignaturas" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAsignaturas /></ProtectedRoute>} />
             <Route path="admin/programas" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminProgramas /></ProtectedRoute>} />

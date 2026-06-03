@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getProyectoDocente, getSeguimiento, createSeguimiento, updateSeguimiento } from '../../api/proyectosDocente';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { getProyectoDocente, createSeguimiento, updateSeguimiento } from '../../api/proyectosDocente';
 import { Save, Plus } from 'lucide-react';
 
 const SeguimientoForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [proyecto, setProyecto] = useState(null);
-  const [seguimiento, setSeguimiento] = useState([]);
   const [nuevoRegistro, setNuevoRegistro] = useState({
     fecha: new Date().toISOString().split('T')[0],
     descripcion: '',
@@ -25,19 +25,13 @@ const SeguimientoForm = () => {
   const fetchData = async () => {
     try {
       console.log('Fetching data for proyecto id:', id);
-      const [proyectoData, seguimientoData] = await Promise.all([
-        getProyectoDocente(id),
-        getSeguimiento(id)
-      ]);
+      const proyectoData = await getProyectoDocente(id);
       console.log('Proyecto data:', proyectoData);
-      console.log('Seguimiento data:', seguimientoData);
       setProyecto(proyectoData);
-      setSeguimiento(seguimientoData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       console.error('Error details:', error.response?.data || error.message);
       setProyecto(null);
-      setSeguimiento([]);
     } finally {
       setLoading(false);
     }
@@ -67,7 +61,7 @@ const SeguimientoForm = () => {
         estado: 'CUMPLIDO',
         observaciones: ''
       });
-      fetchData();
+      alert('Registro de seguimiento creado exitosamente');
     } catch (error) {
       console.error('Error creating seguimiento:', error);
       console.error('Error response:', error.response?.data);
@@ -78,9 +72,10 @@ const SeguimientoForm = () => {
   const handleUpdate = async (seg) => {
     try {
       await updateSeguimiento(id, seg.id, seg);
-      fetchData();
+      alert('Registro de seguimiento actualizado exitosamente');
     } catch (error) {
       console.error('Error updating seguimiento:', error);
+      alert('Error al actualizar el registro de seguimiento');
     }
   };
 
@@ -91,7 +86,7 @@ const SeguimientoForm = () => {
       <div className="p-8">
         <div className="bg-white rounded-xl shadow-sm p-6">
           <p className="text-[#4A4A4A] mb-4">No se pudo cargar el proyecto docente.</p>
-          <button onClick={() => navigate('/seguimiento')} className="text-[#F5A623] font-semibold hover:text-[#E09415]">
+          <button onClick={() => navigate('/seguimiento', { state: { filters: location.state?.filters } })} className="text-[#F5A623] font-semibold hover:text-[#E09415]">
             Volver
           </button>
         </div>
@@ -99,27 +94,13 @@ const SeguimientoForm = () => {
     );
   }
 
-  const avanceTotal = (seguimiento || []).reduce((acc, seg) => {
-    return acc + (seg.estado === 'CUMPLIDO' ? seg.porcentaje_avance : 0);
-  }, 0);
-
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#1E1E1E]">Seguimiento - <span className="text-[#F5A623]">{proyecto.asignatura?.nombre}</span></h1>
-        <button onClick={() => navigate('/seguimiento')} className="text-[#4A4A4A] hover:text-[#1E1E1E]">
+        <h1 className="text-3xl font-bold text-[#1E1E1E]">Nuevo Registro de Seguimiento - <span className="text-[#F5A623]">{proyecto.asignatura?.nombre}</span></h1>
+        <button onClick={() => navigate('/seguimiento', { state: { filters: location.state?.filters } })} className="text-[#4A4A4A] hover:text-[#1E1E1E]">
           Volver
         </button>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <div className="flex justify-between mb-2">
-          <span className="font-semibold text-[#1E1E1E]">Avance Total de la Asignatura</span>
-          <span className="font-bold text-[#1E1E1E]">{avanceTotal}%</span>
-        </div>
-        <div className="w-full bg-[#E5E7EB] rounded-full h-4">
-          <div className={(avanceTotal === 100 ? 'bg-[#38A169]' : 'bg-[#F5A623]') + ' h-4 rounded-full transition-all'} style={{ width: `${avanceTotal}%` }}></div>
-        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -180,38 +161,6 @@ const SeguimientoForm = () => {
             </button>
           </div>
         </form>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Historial de Seguimiento</h3>
-        {seguimiento.length > 0 ? (
-          <div className="space-y-4">
-            {seguimiento.map((seg) => (
-              <div key={seg.id} className="border border-[#F0F0F0] p-4 rounded-xl">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <span className="font-semibold text-[#1E1E1E]">{new Date(seg.fecha).toLocaleDateString()}</span>
-                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ` + (
-                      seg.estado === 'CUMPLIDO' ? 'bg-[#D1FAE5] text-[#065F46]' :
-                      seg.estado === 'PENDIENTE' ? 'bg-[#FEF3C7] text-[#92600A]' :
-                      'bg-[#F0F0F0] text-[#666666]'
-                    )}>
-                      {seg.estado}
-                    </span>
-                  </div>
-                  <span className="text-sm font-semibold text-[#1E1E1E]">{seg.porcentaje_avance}%</span>
-                </div>
-                <p className="font-semibold text-[#1E1E1E]">{seg.descripcion}</p>
-                <p className="text-[#4A4A4A] text-sm mt-1">{seg.desarrollo}</p>
-                {seg.observaciones && (
-                  <p className="text-[#7A7A7A] text-sm mt-2">Obs: {seg.observaciones}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-[#4A4A4A]">No hay registros de seguimiento</p>
-        )}
       </div>
     </div>
   );

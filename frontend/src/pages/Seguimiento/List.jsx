@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getProyectosDocentes } from '../../api/proyectosDocente';
 import { getAsignaturas } from '../../api/asignaturas';
 import { getFacultades } from '../../api/facultades';
@@ -17,10 +17,21 @@ const SeguimientoList = () => {
   const [selectedPrograma, setSelectedPrograma] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetchData();
   }, [user]);
+
+  useEffect(() => {
+    // Restore filters from navigation state when returning from other pages
+    if (location.state?.filters) {
+      const { facultad, programa, asignatura } = location.state.filters;
+      if (facultad) setSelectedFacultad(facultad);
+      if (programa) setSelectedPrograma(programa);
+      if (asignatura) setSelectedAsignatura(asignatura);
+    }
+  }, [location.state]);
 
   const fetchData = async () => {
     try {
@@ -236,13 +247,29 @@ const SeguimientoList = () => {
                     <td className="py-3 px-4">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => navigate(`/seguimiento/${proyecto.id}`)}
+                          onClick={() => navigate(`/seguimiento/${proyecto.id}/detail`, {
+                            state: {
+                              filters: {
+                                facultad: selectedFacultad,
+                                programa: selectedPrograma,
+                                asignatura: selectedAsignatura
+                              }
+                            }
+                          })}
                           className="text-[#F5A623] font-semibold hover:text-[#E09415]"
                         >
                           Ver Seguimiento
                         </button>
                         <button
-                          onClick={() => navigate(`/seguimiento/${proyecto.id}`)}
+                          onClick={() => navigate(`/seguimiento/${proyecto.id}`, {
+                            state: {
+                              filters: {
+                                facultad: selectedFacultad,
+                                programa: selectedPrograma,
+                                asignatura: selectedAsignatura
+                              }
+                            }
+                          })}
                           className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-3 py-1 rounded-lg hover:bg-[#E09415] transition-colors text-sm"
                         >
                           <Plus className="w-3 h-3 mr-1" />
