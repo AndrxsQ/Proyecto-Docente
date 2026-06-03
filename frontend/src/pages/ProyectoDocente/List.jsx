@@ -17,6 +17,7 @@ const ProyectoDocenteList = () => {
   const [selectedAsignatura, setSelectedAsignatura] = useState('');
   const [selectedFacultad, setSelectedFacultad] = useState('');
   const [selectedPrograma, setSelectedPrograma] = useState('');
+  const [sesionesPorSemana, setSesionesPorSemana] = useState(1);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -124,7 +125,11 @@ const ProyectoDocenteList = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await createProyectoDocente({ asignatura_id: parseInt(selectedAsignatura), docente_id: user.id });
+      await createProyectoDocente({ 
+        asignatura_id: parseInt(selectedAsignatura), 
+        docente_id: user.id,
+        sesiones_por_semana: sesionesPorSemana
+      });
       setShowNewModal(false);
       fetchData();
     } catch (error) {
@@ -347,6 +352,18 @@ const ProyectoDocenteList = () => {
                   ))}
                 </select>
               </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Sesiones por Semana</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="3"
+                  value={sesionesPorSemana}
+                  onChange={(e) => setSesionesPorSemana(parseInt(e.target.value) || 1)}
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
+                  required
+                />
+              </div>
               <div className="flex gap-2 justify-end">
                 <button
                   type="button"
@@ -355,6 +372,7 @@ const ProyectoDocenteList = () => {
                     setSelectedFacultad('');
                     setSelectedPrograma('');
                     setSelectedAsignatura('');
+                    setSesionesPorSemana(1);
                   }}
                   className="px-4 py-2 border border-[#F5A623] text-[#F5A623] rounded-lg hover:bg-[#FFFBF2] transition-colors"
                 >

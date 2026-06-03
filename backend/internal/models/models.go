@@ -186,6 +186,7 @@ type ProyectoDocente struct {
 	Creacion           time.Time        `json:"creacion"`
 	UltimaModificacion time.Time        `json:"ultima_modificacion"`
 	DocenteID          int              `json:"docente_id"`
+	SesionesPorSemana  int              `json:"sesiones_por_semana"`
 	EstadoJefeDept     EstadoRevision   `json:"estado_jefedept"`
 	EstadoDirector     EstadoRevision   `json:"estado_director"`
 	EstadoComite       EstadoRevision   `json:"estado_comite"`

@@ -17,7 +17,7 @@ func NewProyectoDocenteRepository(db *DB) *ProyectoDocenteRepository {
 func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]models.ProyectoDocente, error) {
 	query := `
 		SELECT pd.id, pd.asignatura_id, pd.version, pd.estado, pd.creacion, pd.ultima_modificacion,
-		       pd.docente_id, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano,
+		       pd.docente_id, pd.sesiones_por_semana, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano,
 		       c.nombre as asignatura_nombre, c.componente, c.creditos, c.periodo_academico,
 		       u.nombre as docente_nombre, u.apellido as docente_apellido
 		FROM proyectos_docente pd
@@ -68,7 +68,7 @@ func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]mo
 		var docenteNombre, docenteApellido sql.NullString
 		if err := rows.Scan(
 			&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion,
-			&pd.DocenteID, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano,
+			&pd.DocenteID, &pd.SesionesPorSemana, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano,
 			&asignaturaNombre, &componente, &creditos, &periodo,
 			&docenteNombre, &docenteApellido,
 		); err != nil {
@@ -100,7 +100,7 @@ func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]mo
 func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, error) {
 	query := `
 		SELECT pd.id, pd.asignatura_id, pd.version, pd.estado, pd.creacion, pd.ultima_modificacion,
-		       pd.docente_id, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano,
+		       pd.docente_id, pd.sesiones_por_semana, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano,
 		       c.id, c.nombre, c.componente, c.area, c.codigo, c.creditos, c.horas_ti, c.horas_tde, c.horas_tdp, c.total_horas, c.semanas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico, c.programa_id, c.docente_id,
 		       p.id, p.nombre as programa_nombre, p.modalidad, p.jornada, p.facultad_id,
@@ -124,7 +124,7 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 	var facultadNombre sql.NullString
 	err := row.Scan(
 		&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion,
-		&pd.DocenteID, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano,
+		&pd.DocenteID, &pd.SesionesPorSemana, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano,
 		&asignatura.ID, &asignatura.Nombre, &asignatura.Componente, &asignatura.Area, &asignatura.Codigo, &asignatura.Creditos, &asignatura.HorasTI, &asignatura.HorasTDE, &asignatura.HorasTDP, &asignatura.TotalHoras, &asignatura.Semanas, &asignatura.Tipo,
 		&asignatura.Prerrequisitos, &asignatura.Correquisitos, &asignatura.PeriodoAcademico, &asignatura.ProgramaID, &asignatura.DocenteID,
 		&programaID, &programaNombre, &programaModalidad, &programaJornada, &programaFacultadID,
@@ -162,10 +162,10 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 
 func (r *ProyectoDocenteRepository) Create(pd *models.ProyectoDocente) error {
 	query := `
-		INSERT INTO proyectos_docente (asignatura_id, version, estado, docente_id)
-		VALUES ($1, $2, $3, $4) RETURNING id
+		INSERT INTO proyectos_docente (asignatura_id, version, estado, docente_id, sesiones_por_semana)
+		VALUES ($1, $2, $3, $4, $5) RETURNING id
 	`
-	return r.db.QueryRow(query, pd.AsignaturaID, pd.Version, pd.Estado, pd.DocenteID).Scan(&pd.ID)
+	return r.db.QueryRow(query, pd.AsignaturaID, pd.Version, pd.Estado, pd.DocenteID, pd.SesionesPorSemana).Scan(&pd.ID)
 }
 
 func (r *ProyectoDocenteRepository) Update(pd *models.ProyectoDocente) error {

@@ -65,7 +65,7 @@ func (s *ProyectoDocenteService) GetByID(id int) (*models.ProyectoDocente, error
 	return pd, nil
 }
 
-func (s *ProyectoDocenteService) Create(asignaturaID, docenteID int) (*models.ProyectoDocente, error) {
+func (s *ProyectoDocenteService) Create(asignaturaID, docenteID, sesionesPorSemana int) (*models.ProyectoDocente, error) {
 	version, err := s.pdRepo.GetNextVersion(asignaturaID)
 	if err != nil {
 		return nil, err
@@ -78,6 +78,7 @@ func (s *ProyectoDocenteService) Create(asignaturaID, docenteID int) (*models.Pr
 		Creacion:           time.Now(),
 		UltimaModificacion: time.Now(),
 		DocenteID:          docenteID,
+		SesionesPorSemana:  sesionesPorSemana,
 		EstadoJefeDept:     models.EstadoRevisionPendiente,
 		EstadoDirector:     models.EstadoRevisionPendiente,
 		EstadoComite:       models.EstadoRevisionPendiente,
