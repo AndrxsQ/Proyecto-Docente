@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getProyectoDocente, createSeguimiento, updateSeguimiento } from '../../api/proyectosDocente';
+import { getProyectoDocente, getSeguimiento, createSeguimiento, updateSeguimiento, getContenido } from '../../api/proyectosDocente';
 import { Save, Plus } from 'lucide-react';
 
 const SeguimientoForm = () => {
@@ -8,6 +8,10 @@ const SeguimientoForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [proyecto, setProyecto] = useState(null);
+  const [contenido, setContenido] = useState([]);
+  const [seguimiento, setSeguimiento] = useState([]);
+  const [currentSemana, setCurrentSemana] = useState(1);
+  const [currentSesion, setCurrentSesion] = useState(1);
   const [nuevoRegistro, setNuevoRegistro] = useState({
     fecha: new Date().toISOString().split('T')[0],
     descripcion: '',
@@ -25,15 +29,58 @@ const SeguimientoForm = () => {
   const fetchData = async () => {
     try {
       console.log('Fetching data for proyecto id:', id);
-      const proyectoData = await getProyectoDocente(id);
+      const [proyectoData, contenidoData, seguimientoData] = await Promise.all([
+        getProyectoDocente(id),
+        getContenido(id),
+        getSeguimiento(id)
+      ]);
       console.log('Proyecto data:', proyectoData);
+      console.log('Contenido data:', contenidoData);
+      console.log('Seguimiento data:', seguimientoData);
       setProyecto(proyectoData);
+      setContenido(contenidoData || []);
+      setSeguimiento(seguimientoData || []);
+      
+      // Calculate next week/session to register
+      calculateNextSession(contenidoData || [], seguimientoData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       console.error('Error details:', error.response?.data || error.message);
       setProyecto(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const calculateNextSession = (contenido, seguimiento) => {
+    if (!contenido || contenido.length === 0) {
+      setCurrentSemana(1);
+      setCurrentSesion(1);
+      return;
+    }
+
+    // Sort contenido by semana and sesion
+    const sortedContenido = contenido.sort((a, b) => {
+      if (a.semana !== b.semana) return a.semana - b.semana;
+      return a.sesion - b.sesion;
+    });
+
+    // Find the first session that doesn't have a seguimiento record
+    for (const item of sortedContenido) {
+      const hasRecord = seguimiento.some(seg => 
+        seg.semana === item.semana && seg.sesion === item.sesion
+      );
+      if (!hasRecord) {
+        setCurrentSemana(item.semana);
+        setCurrentSesion(item.sesion);
+        return;
+      }
+    }
+
+    // If all sessions have records, set to the first one
+    if (sortedContenido.length > 0) {
+      setCurrentSemana(sortedContenido[0].semana);
+      setCurrentSesion(sortedContenido[0].sesion);
     }
   };
 
@@ -49,7 +96,9 @@ const SeguimientoForm = () => {
         desarrollo: nuevoRegistro.desarrollo,
         porcentaje_avance: nuevoRegistro.porcentaje_avance,
         estado: nuevoRegistro.estado,
-        observaciones: nuevoRegistro.observaciones
+        observaciones: nuevoRegistro.observaciones,
+        semana: currentSemana,
+        sesion: currentSesion
       };
       console.log('Creating seguimiento with data:', dataToSend);
       await createSeguimiento(id, dataToSend);
@@ -62,6 +111,8 @@ const SeguimientoForm = () => {
         observaciones: ''
       });
       alert('Registro de seguimiento creado exitosamente');
+      // Recalculate next session after creating a record
+      fetchData();
     } catch (error) {
       console.error('Error creating seguimiento:', error);
       console.error('Error response:', error.response?.data);
@@ -109,6 +160,78 @@ const SeguimientoForm = () => {
             Volver
           </button>
         </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Semana</label>
+            <select
+              value={currentSemana}
+              onChange={(e) => {
+                const semana = parseInt(e.target.value);
+                setCurrentSemana(semana);
+                // Find the first session for this week
+                const firstSession = contenido
+                  .filter(c => c.semana === semana)
+                  .sort((a, b) => a.sesion - b.sesion)[0];
+                if (firstSession) {
+                  setCurrentSesion(firstSession.sesion);
+                }
+              }}
+              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
+            >
+              {[...new Set(contenido.map(c => c.semana))].sort((a, b) => a - b).map(semana => (
+                <option key={semana} value={semana}>
+                  Semana {semana}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Sesión</label>
+            <select
+              value={currentSesion}
+              onChange={(e) => setCurrentSesion(parseInt(e.target.value))}
+              className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
+            >
+              {contenido
+                .filter(c => c.semana === currentSemana)
+                .sort((a, b) => a.sesion - b.sesion)
+                .map(c => (
+                  <option key={c.id} value={c.sesion}>
+                    Sesión {c.sesion}
+                  </option>
+                ))}
+            </select>
+          </div>
+        </div>
+        
+        {(() => {
+          const selectedContenido = contenido.find(c => c.semana === currentSemana && c.sesion === currentSesion);
+          if (selectedContenido) {
+            return (
+              <div className="mt-4 p-4 bg-[#FFF8EC] rounded-lg border border-[#F5A623]/20">
+                <h4 className="font-semibold text-[#1E1E1E] mb-2">Información de la Sesión</h4>
+                <div className="space-y-2">
+                  <div>
+                    <span className="text-sm font-medium text-[#4A4A4A]">Tema Programado:</span>
+                    <p className="text-[#1E1E1E]">{selectedContenido.tema || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-[#4A4A4A]">Descripción:</span>
+                    <p className="text-[#1E1E1E]">{selectedContenido.descripcion || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-[#4A4A4A]">Fecha Programada:</span>
+                    <p className="text-[#1E1E1E]">{selectedContenido.fecha || 'Por definir'}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+          return null;
+        })()}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">

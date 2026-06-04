@@ -17,6 +17,7 @@ func (r *SeguimientoRepository) GetByProyectoDocenteID(pdID int) ([]models.Segui
 	query := `
 		SELECT s.id, s.proyecto_docente_id, s.asignatura_id, s.docente_id, s.fecha,
 		       s.desarrollo, s.descripcion, s.porcentaje_avance, s.estado, s.reporte, s.observaciones,
+		       s.semana, s.sesion,
 		       u.nombre as docente_nombre, u.apellido as docente_apellido
 		FROM seguimiento s
 		LEFT JOIN usuarios u ON s.docente_id = u.id
@@ -37,6 +38,7 @@ func (r *SeguimientoRepository) GetByProyectoDocenteID(pdID int) ([]models.Segui
 		if err := rows.Scan(
 			&s.ID, &s.ProyectoDocenteID, &s.AsignaturaID, &s.DocenteID, &s.Fecha,
 			&s.Desarrollo, &s.Descripcion, &s.PorcentajeAvance, &s.Estado, &reporte, &observaciones,
+			&s.Semana, &s.Sesion,
 			&docenteNombre, &docenteApellido,
 		); err != nil {
 			return nil, err
@@ -58,7 +60,8 @@ func (r *SeguimientoRepository) GetByProyectoDocenteID(pdID int) ([]models.Segui
 func (r *SeguimientoRepository) GetByAsignaturaID(asignaturaID int) ([]models.Seguimiento, error) {
 	query := `
 		SELECT s.id, s.proyecto_docente_id, s.asignatura_id, s.docente_id, s.fecha,
-		       s.desarrollo, s.descripcion, s.porcentaje_avance, s.estado, s.reporte, s.observaciones
+		       s.desarrollo, s.descripcion, s.porcentaje_avance, s.estado, s.reporte, s.observaciones,
+		       s.semana, s.sesion
 		FROM seguimiento s
 		WHERE s.asignatura_id = $1
 		ORDER BY s.fecha
@@ -76,6 +79,7 @@ func (r *SeguimientoRepository) GetByAsignaturaID(asignaturaID int) ([]models.Se
 		if err := rows.Scan(
 			&s.ID, &s.ProyectoDocenteID, &s.AsignaturaID, &s.DocenteID, &s.Fecha,
 			&s.Desarrollo, &s.Descripcion, &s.PorcentajeAvance, &s.Estado, &reporte, &observaciones,
+			&s.Semana, &s.Sesion,
 		); err != nil {
 			return nil, err
 		}
@@ -96,7 +100,8 @@ func (r *SeguimientoRepository) GetByAsignaturaID(asignaturaID int) ([]models.Se
 func (r *SeguimientoRepository) GetByID(id int) (*models.Seguimiento, error) {
 	query := `
 		SELECT id, proyecto_docente_id, asignatura_id, docente_id, fecha,
-		       desarrollo, descripcion, porcentaje_avance, estado, reporte, observaciones
+		       desarrollo, descripcion, porcentaje_avance, estado, reporte, observaciones,
+		       semana, sesion
 		FROM seguimiento
 		WHERE id = $1
 	`
@@ -107,6 +112,7 @@ func (r *SeguimientoRepository) GetByID(id int) (*models.Seguimiento, error) {
 	err := row.Scan(
 		&s.ID, &s.ProyectoDocenteID, &s.AsignaturaID, &s.DocenteID, &s.Fecha,
 		&s.Desarrollo, &s.Descripcion, &s.PorcentajeAvance, &s.Estado, &reporte, &observaciones,
+		&s.Semana, &s.Sesion,
 	)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -128,25 +134,25 @@ func (r *SeguimientoRepository) GetByID(id int) (*models.Seguimiento, error) {
 func (r *SeguimientoRepository) Create(seguimiento *models.Seguimiento) error {
 	query := `
 		INSERT INTO seguimiento (proyecto_docente_id, asignatura_id, docente_id, fecha, desarrollo,
-		                         descripcion, porcentaje_avance, estado, reporte, observaciones)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
+		                         descripcion, porcentaje_avance, estado, reporte, observaciones, semana, sesion)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id
 	`
 	return r.db.QueryRow(query, seguimiento.ProyectoDocenteID, seguimiento.AsignaturaID,
 		seguimiento.DocenteID, seguimiento.Fecha, seguimiento.Desarrollo,
 		seguimiento.Descripcion, seguimiento.PorcentajeAvance, seguimiento.Estado,
-		seguimiento.Reporte, seguimiento.Observaciones).Scan(&seguimiento.ID)
+		seguimiento.Reporte, seguimiento.Observaciones, seguimiento.Semana, seguimiento.Sesion).Scan(&seguimiento.ID)
 }
 
 func (r *SeguimientoRepository) Update(seguimiento *models.Seguimiento) error {
 	query := `
 		UPDATE seguimiento
 		SET fecha = $1, desarrollo = $2, descripcion = $3, porcentaje_avance = $4,
-		    estado = $5, reporte = $6, observaciones = $7
-		WHERE id = $8
+		    estado = $5, reporte = $6, observaciones = $7, semana = $8, sesion = $9
+		WHERE id = $10
 	`
 	_, err := r.db.Exec(query, seguimiento.Fecha, seguimiento.Desarrollo,
 		seguimiento.Descripcion, seguimiento.PorcentajeAvance, seguimiento.Estado,
-		seguimiento.Reporte, seguimiento.Observaciones, seguimiento.ID)
+		seguimiento.Reporte, seguimiento.Observaciones, seguimiento.Semana, seguimiento.Sesion, seguimiento.ID)
 	return err
 }
 

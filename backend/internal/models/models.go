@@ -233,6 +233,8 @@ type Seguimiento struct {
 	Estado            EstadoSeguimiento `json:"estado"`
 	Reporte           string            `json:"reporte,omitempty"`
 	Observaciones     string            `json:"observaciones,omitempty"`
+	Semana            int               `json:"semana"`
+	Sesion            int               `json:"sesion"`
 }
 
 type Observacion struct {
