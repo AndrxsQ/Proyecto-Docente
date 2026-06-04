@@ -222,19 +222,22 @@ type ContenidoCurso struct {
 }
 
 type Seguimiento struct {
-	ID                int               `json:"id"`
-	ProyectoDocenteID int               `json:"proyecto_docente_id"`
-	AsignaturaID      int               `json:"asignatura_id"`
-	DocenteID         int               `json:"docente_id"`
-	Fecha             time.Time         `json:"fecha"`
-	Desarrollo        string            `json:"desarrollo"`
-	Descripcion       string            `json:"descripcion"`
-	PorcentajeAvance  int               `json:"porcentaje_avance"`
-	Estado            EstadoSeguimiento `json:"estado"`
-	Reporte           string            `json:"reporte,omitempty"`
-	Observaciones     string            `json:"observaciones,omitempty"`
-	Semana            int               `json:"semana"`
-	Sesion            int               `json:"sesion"`
+	ID                 int               `json:"id"`
+	ProyectoDocenteID  int               `json:"proyecto_docente_id"`
+	AsignaturaID       int               `json:"asignatura_id"`
+	DocenteID          int               `json:"docente_id"`
+	Fecha              time.Time         `json:"fecha"`
+	TemaDesarrollado   string            `json:"tema_desarrollado"`
+	DescripcionTema    string            `json:"descripcion_tema"`
+	PorcentajeAvance   int               `json:"porcentaje_avance"`
+	Estado             EstadoSeguimiento `json:"estado"`
+	Reporte            string            `json:"reporte,omitempty"`
+	Observaciones      string            `json:"observaciones,omitempty"`
+	Semana             int               `json:"semana"`
+	Sesion             int               `json:"sesion"`
+	ModalidadEntorno   string            `json:"modalidad_entorno,omitempty"`
+	ModalidadSincronia string            `json:"modalidad_sincronia,omitempty"`
+	ModalidadEnfoque   string            `json:"modalidad_enfoque,omitempty"`
 }
 
 type Observacion struct {

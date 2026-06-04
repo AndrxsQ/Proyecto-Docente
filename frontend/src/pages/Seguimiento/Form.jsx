@@ -14,11 +14,14 @@ const SeguimientoForm = () => {
   const [currentSesion, setCurrentSesion] = useState(1);
   const [nuevoRegistro, setNuevoRegistro] = useState({
     fecha: new Date().toISOString().split('T')[0],
-    descripcion: '',
-    desarrollo: '',
+    tema_desarrollado: '',
+    descripcion_tema: '',
     porcentaje_avance: 1,
     estado: 'CUMPLIDO',
-    observaciones: ''
+    observaciones: '',
+    modalidad_entorno: '',
+    modalidad_sincronia: '',
+    modalidad_enfoque: ''
   });
   const [loading, setLoading] = useState(true);
 
@@ -92,23 +95,29 @@ const SeguimientoForm = () => {
         asignatura_id: proyecto.asignatura_id,
         docente_id: proyecto.docente_id,
         fecha: new Date(nuevoRegistro.fecha).toISOString(),
-        descripcion: nuevoRegistro.descripcion,
-        desarrollo: nuevoRegistro.desarrollo,
+        tema_desarrollado: nuevoRegistro.tema_desarrollado,
+        descripcion_tema: nuevoRegistro.descripcion_tema,
         porcentaje_avance: nuevoRegistro.porcentaje_avance,
         estado: nuevoRegistro.estado,
         observaciones: nuevoRegistro.observaciones,
         semana: currentSemana,
-        sesion: currentSesion
+        sesion: currentSesion,
+        modalidad_entorno: nuevoRegistro.modalidad_entorno,
+        modalidad_sincronia: nuevoRegistro.modalidad_sincronia,
+        modalidad_enfoque: nuevoRegistro.modalidad_enfoque
       };
       console.log('Creating seguimiento with data:', dataToSend);
       await createSeguimiento(id, dataToSend);
       setNuevoRegistro({
         fecha: new Date().toISOString().split('T')[0],
-        descripcion: '',
-        desarrollo: '',
+        tema_desarrollado: '',
+        descripcion_tema: '',
         porcentaje_avance: 1,
         estado: 'CUMPLIDO',
-        observaciones: ''
+        observaciones: '',
+        modalidad_entorno: '',
+        modalidad_sincronia: '',
+        modalidad_enfoque: ''
       });
       alert('Registro de seguimiento creado exitosamente');
       // Recalculate next session after creating a record
@@ -259,21 +268,68 @@ const SeguimientoForm = () => {
               <option value="REPROGRAMADO">REPROGRAMADO</option>
             </select>
           </div>
+          <div className="md:col-span-2 mt-4">
+            <h4 className="text-md font-semibold text-[#1E1E1E] mb-3">Modalidades de Enseñanza</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Según el Entorno</label>
+                <select
+                  value={nuevoRegistro.modalidad_entorno}
+                  onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, modalidad_entorno: e.target.value })}
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
+                >
+                  <option value="">Seleccionar</option>
+                  <option value="Presencial">Presencial</option>
+                  <option value="Virtual o en línea">Virtual o en línea</option>
+                  <option value="Semipresencial o híbrida">Semipresencial o híbrida</option>
+                  <option value="A distancia">A distancia</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Según la Sincronía</label>
+                <select
+                  value={nuevoRegistro.modalidad_sincronia}
+                  onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, modalidad_sincronia: e.target.value })}
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
+                >
+                  <option value="">Seleccionar</option>
+                  <option value="Sincrónica">Sincrónica</option>
+                  <option value="Asincrónica">Asincrónica</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Según el Enfoque Pedagógico</label>
+                <select
+                  value={nuevoRegistro.modalidad_enfoque}
+                  onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, modalidad_enfoque: e.target.value })}
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
+                >
+                  <option value="">Seleccionar</option>
+                  <option value="Magistral o expositiva">Magistral o expositiva</option>
+                  <option value="Activa o participativa">Activa o participativa</option>
+                  <option value="Invertida (Flipped Classroom)">Invertida (Flipped Classroom)</option>
+                  <option value="Por proyectos (ABP)">Por proyectos (ABP)</option>
+                  <option value="Por problemas">Por problemas</option>
+                  <option value="Tutoría o mentoría">Tutoría o mentoría</option>
+                </select>
+              </div>
+            </div>
+          </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Tema / Descripción</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Tema Desarrollado</label>
             <input
               type="text"
-              value={nuevoRegistro.descripcion}
-              onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, descripcion: e.target.value })}
+              value={nuevoRegistro.tema_desarrollado}
+              onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, tema_desarrollado: e.target.value })}
               className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
               required
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Desarrollo de la Clase</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Descripción del Tema</label>
             <textarea
-              value={nuevoRegistro.desarrollo}
-              onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, desarrollo: e.target.value })}
+              value={nuevoRegistro.descripcion_tema}
+              onChange={(e) => setNuevoRegistro({ ...nuevoRegistro, descripcion_tema: e.target.value })}
               className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-24"
             />
           </div>
@@ -285,6 +341,7 @@ const SeguimientoForm = () => {
               className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA] h-20"
             />
           </div>
+          
           <div className="md:col-span-2">
             <button type="submit" className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors">
               <Plus className="w-4 h-4 mr-2" />
