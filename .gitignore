@@ -87,4 +87,4 @@ Thumbs.db
 *.backup
 *~
 
-backend/db/migrations/*
+DEPLOYMENT.md
