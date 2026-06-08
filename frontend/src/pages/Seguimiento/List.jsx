@@ -35,7 +35,7 @@ const SeguimientoList = () => {
 
   const fetchData = async () => {
     try {
-      const filters = { estado: 'APROBADO' };
+      const filters = { estado: 'APROBADO', activo: true };
       if (user.rol === 'DOCENTE') {
         filters.docente_id = user.id;
       }

@@ -38,6 +38,9 @@ func (h *ProyectoDocenteHandler) GetAll(w http.ResponseWriter, r *http.Request) 
 	if periodo := r.URL.Query().Get("periodo"); periodo != "" {
 		filters["periodo"] = periodo
 	}
+	if activo := r.URL.Query().Get("activo"); activo != "" {
+		filters["activo"] = activo
+	}
 
 	proyectos, err := h.pdService.GetAll(filters)
 	if err != nil {

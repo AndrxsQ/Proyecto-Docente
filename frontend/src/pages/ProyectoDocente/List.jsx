@@ -260,7 +260,7 @@ const ProyectoDocenteList = () => {
                     </td>
                     <td className="py-3 px-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ` + getActivoBadge(proyecto.activo)}>
-                        {proyecto.activo ? 'Activo' : 'Inactivo'}
+                        {proyecto.activo ? 'ACTIVO' : 'INACTIVO'}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-sm text-[#4A4A4A]">{new Date(proyecto.ultima_modificacion).toLocaleDateString()}</td>
