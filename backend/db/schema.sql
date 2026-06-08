@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS proyectos_docente (
     estado_comite VARCHAR(20) DEFAULT 'PENDIENTE' NOT NULL CHECK (estado_comite IN ('PENDIENTE', 'APROBADO', 'DEVUELTO')),
     estado_decano VARCHAR(20) DEFAULT 'PENDIENTE' NOT NULL CHECK (estado_decano IN ('PENDIENTE', 'APROBADO', 'DEVUELTO')),
     sesiones_por_semana INTEGER DEFAULT 1,
+    activo BOOLEAN DEFAULT FALSE NOT NULL,
     FOREIGN KEY (asignatura_id) REFERENCES asignaturas(id) ON DELETE CASCADE,
     FOREIGN KEY (docente_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     UNIQUE (asignatura_id, version)

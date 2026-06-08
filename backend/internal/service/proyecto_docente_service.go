@@ -83,6 +83,7 @@ func (s *ProyectoDocenteService) Create(asignaturaID, docenteID, sesionesPorSema
 		EstadoDirector:     models.EstadoRevisionPendiente,
 		EstadoComite:       models.EstadoRevisionPendiente,
 		EstadoDecano:       models.EstadoRevisionPendiente,
+		Activo:             false, // New projects are inactive by default
 	}
 
 	if err := s.pdRepo.Create(pd); err != nil {
@@ -172,6 +173,17 @@ func (s *ProyectoDocenteService) Aprobar(id int, rol models.Rol, autorID int, ob
 			return errors.New("el proyecto no está avalado")
 		}
 		pd.Estado = models.EstadoAprobado
+		// Activate this project and deactivate all others for the same asignatura
+		if err := s.pdRepo.DeactivateAllForAsignatura(pd.AsignaturaID); err != nil {
+			fmt.Printf("DEBUG SERVICE: Error deactivating other projects: %v\n", err)
+			return err
+		}
+		pd.Activo = true
+		if err := s.pdRepo.ActivateProject(id); err != nil {
+			fmt.Printf("DEBUG SERVICE: Error activating project: %v\n", err)
+			return err
+		}
+		fmt.Printf("DEBUG SERVICE: Project activated, others deactivated\n")
 	default:
 		fmt.Printf("DEBUG SERVICE: Unauthorized group: %s\n", grupo)
 		return errors.New("grupo no autorizado para aprobar")

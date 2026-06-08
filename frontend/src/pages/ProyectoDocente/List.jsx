@@ -204,6 +204,13 @@ const ProyectoDocenteList = () => {
     return badges[estado] || 'bg-[#F0F0F0] text-[#666666]';
   };
 
+  const getActivoBadge = (activo) => {
+    if (activo) {
+      return 'bg-[#D1FAE5] text-[#065F46]';
+    }
+    return 'bg-[#F3F4F6] text-[#6B7280]';
+  };
+
   if (loading) return <div className="p-8 text-[#4A4A4A]">Cargando...</div>;
 
   return (
@@ -229,6 +236,7 @@ const ProyectoDocenteList = () => {
                 <th className="text-left py-3 px-4 text-sm font-semibold text-white">Asignatura</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-white">Versión</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-white">Estado</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-white">Activo</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-white">Última Modificación</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-white">Acciones</th>
               </tr>
@@ -236,7 +244,7 @@ const ProyectoDocenteList = () => {
             <tbody>
               {!proyectos || proyectos.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-4 text-center text-[#4A4A4A]">
+                  <td colSpan="6" className="p-4 text-center text-[#4A4A4A]">
                     No hay proyectos para mostrar
                   </td>
                 </tr>
@@ -248,6 +256,11 @@ const ProyectoDocenteList = () => {
                     <td className="py-3 px-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ` + getEstadoBadge(proyecto.estado)}>
                         {proyecto.estado.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ` + getActivoBadge(proyecto.activo)}>
+                        {proyecto.activo ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-sm text-[#4A4A4A]">{new Date(proyecto.ultima_modificacion).toLocaleDateString()}</td>

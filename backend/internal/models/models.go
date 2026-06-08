@@ -191,6 +191,7 @@ type ProyectoDocente struct {
 	EstadoDirector     EstadoRevision   `json:"estado_director"`
 	EstadoComite       EstadoRevision   `json:"estado_comite"`
 	EstadoDecano       EstadoRevision   `json:"estado_decano"`
+	Activo             bool             `json:"activo"`
 	Asignatura         *Asignatura      `json:"asignatura,omitempty"`
 	Docente            *Usuario         `json:"docente,omitempty"`
 	Formato            *Formato         `json:"formato,omitempty"`

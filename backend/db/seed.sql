@@ -75,12 +75,12 @@ INSERT INTO resultados_aprendizaje_asignatura (id, resultado_aprendizaje_id, asi
 (6, 7, 5);
 
 -- Proyectos Docente
-INSERT INTO proyectos_docente (id, asignatura_id, version, estado, creacion, ultima_modificacion, docente_id, estado_jefedept, estado_director, estado_comite, estado_decano, sesiones_por_semana) VALUES
-(1, 1, 1, 'APROBADO', '2026-05-23 18:56:00', '2026-05-23 21:08:54', 1, 'APROBADO', 'APROBADO', 'APROBADO', 'APROBADO', 1),
-(2, 2, 1, 'APROBADO', '2026-05-23 21:39:38', '2026-05-23 22:15:51', 1, 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 1),
-(3, 3, 1, 'APROBADO', '2026-05-27 08:55:27', '2026-05-28 14:10:54', 1, 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 1),
-(4, 4, 1, 'APROBADO', '2026-05-27 08:13:10', '2026-05-28 14:10:55', 1, 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 2),
-(5, 5, 1, 'APROBADO', '2026-05-27 08:55:27', '2026-05-28 14:10:54', 10, 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 1);
+INSERT INTO proyectos_docente (id, asignatura_id, version, estado, creacion, ultima_modificacion, docente_id, estado_jefedept, estado_director, estado_comite, estado_decano, sesiones_por_semana, activo) VALUES
+(1, 1, 1, 'APROBADO', '2026-05-23 18:56:00', '2026-05-23 21:08:54', 1, 'APROBADO', 'APROBADO', 'APROBADO', 'APROBADO', 1, true),
+(2, 2, 1, 'APROBADO', '2026-05-23 21:39:38', '2026-05-23 22:15:51', 1, 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 1, true),
+(3, 3, 1, 'APROBADO', '2026-05-27 08:55:27', '2026-05-28 14:10:54', 1, 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 1, true),
+(4, 4, 1, 'APROBADO', '2026-05-27 08:13:10', '2026-05-28 14:10:55', 1, 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 2, true),
+(5, 5, 1, 'APROBADO', '2026-05-27 08:55:27', '2026-05-28 14:10:54', 10, 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 'PENDIENTE', 1, true);
 
 -- Resultados de Aprendizaje por Curso
 INSERT INTO resultados_aprendizaje_curso (id, proyecto_docente_id, resultado_curso, contribucion_programa, resultado_aprendizaje_id) VALUES

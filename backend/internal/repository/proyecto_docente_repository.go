@@ -17,7 +17,7 @@ func NewProyectoDocenteRepository(db *DB) *ProyectoDocenteRepository {
 func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]models.ProyectoDocente, error) {
 	query := `
 		SELECT pd.id, pd.asignatura_id, pd.version, pd.estado, pd.creacion, pd.ultima_modificacion,
-		       pd.docente_id, pd.sesiones_por_semana, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano,
+		       pd.docente_id, pd.sesiones_por_semana, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano, pd.activo,
 		       c.nombre as asignatura_nombre, c.componente, c.creditos, c.periodo_academico,
 		       u.nombre as docente_nombre, u.apellido as docente_apellido
 		FROM proyectos_docente pd
@@ -52,6 +52,12 @@ func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]mo
 		argIndex++
 	}
 
+	if activo, ok := filters["activo"]; ok {
+		query += " AND pd.activo = $" + string(rune('0'+argIndex))
+		args = append(args, activo)
+		argIndex++
+	}
+
 	query += " ORDER BY pd.ultima_modificacion DESC"
 
 	rows, err := r.db.Query(query, args...)
@@ -68,7 +74,7 @@ func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]mo
 		var docenteNombre, docenteApellido sql.NullString
 		if err := rows.Scan(
 			&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion,
-			&pd.DocenteID, &pd.SesionesPorSemana, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano,
+			&pd.DocenteID, &pd.SesionesPorSemana, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano, &pd.Activo,
 			&asignaturaNombre, &componente, &creditos, &periodo,
 			&docenteNombre, &docenteApellido,
 		); err != nil {
@@ -100,7 +106,7 @@ func (r *ProyectoDocenteRepository) GetAll(filters map[string]interface{}) ([]mo
 func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, error) {
 	query := `
 		SELECT pd.id, pd.asignatura_id, pd.version, pd.estado, pd.creacion, pd.ultima_modificacion,
-		       pd.docente_id, pd.sesiones_por_semana, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano,
+		       pd.docente_id, pd.sesiones_por_semana, pd.estado_jefedept, pd.estado_director, pd.estado_comite, pd.estado_decano, pd.activo,
 		       c.id, c.nombre, c.componente, c.area, c.codigo, c.creditos, c.horas_ti, c.horas_tde, c.horas_tdp, c.total_horas, c.semanas, c.tipo,
 		       c.prerrequisitos, c.correquisitos, c.periodo_academico, c.programa_id, c.docente_id,
 		       p.id, p.nombre as programa_nombre, p.modalidad, p.jornada, p.facultad_id,
@@ -124,7 +130,7 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 	var facultadNombre sql.NullString
 	err := row.Scan(
 		&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion,
-		&pd.DocenteID, &pd.SesionesPorSemana, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano,
+		&pd.DocenteID, &pd.SesionesPorSemana, &pd.EstadoJefeDept, &pd.EstadoDirector, &pd.EstadoComite, &pd.EstadoDecano, &pd.Activo,
 		&asignatura.ID, &asignatura.Nombre, &asignatura.Componente, &asignatura.Area, &asignatura.Codigo, &asignatura.Creditos, &asignatura.HorasTI, &asignatura.HorasTDE, &asignatura.HorasTDP, &asignatura.TotalHoras, &asignatura.Semanas, &asignatura.Tipo,
 		&asignatura.Prerrequisitos, &asignatura.Correquisitos, &asignatura.PeriodoAcademico, &asignatura.ProgramaID, &asignatura.DocenteID,
 		&programaID, &programaNombre, &programaModalidad, &programaJornada, &programaFacultadID,
@@ -162,8 +168,8 @@ func (r *ProyectoDocenteRepository) GetByID(id int) (*models.ProyectoDocente, er
 
 func (r *ProyectoDocenteRepository) Create(pd *models.ProyectoDocente) error {
 	query := `
-		INSERT INTO proyectos_docente (asignatura_id, version, estado, docente_id, sesiones_por_semana)
-		VALUES ($1, $2, $3, $4, $5) RETURNING id
+		INSERT INTO proyectos_docente (asignatura_id, version, estado, docente_id, sesiones_por_semana, activo)
+		VALUES ($1, $2, $3, $4, $5, FALSE) RETURNING id
 	`
 	return r.db.QueryRow(query, pd.AsignaturaID, pd.Version, pd.Estado, pd.DocenteID, pd.SesionesPorSemana).Scan(&pd.ID)
 }
@@ -172,11 +178,11 @@ func (r *ProyectoDocenteRepository) Update(pd *models.ProyectoDocente) error {
 	query := `
 		UPDATE proyectos_docente
 		SET estado = $1, ultima_modificacion = $2,
-		    estado_jefedept = $3, estado_director = $4, estado_comite = $5, estado_decano = $6
-		WHERE id = $7
+		    estado_jefedept = $3, estado_director = $4, estado_comite = $5, estado_decano = $6, activo = $7
+		WHERE id = $8
 	`
 	_, err := r.db.Exec(query, pd.Estado, time.Now(), pd.EstadoJefeDept, pd.EstadoDirector,
-		pd.EstadoComite, pd.EstadoDecano, pd.ID)
+		pd.EstadoComite, pd.EstadoDecano, pd.Activo, pd.ID)
 	return err
 }
 
@@ -192,7 +198,7 @@ func (r *ProyectoDocenteRepository) GetNextVersion(asignaturaID int) (int, error
 
 func (r *ProyectoDocenteRepository) GetByAsignatura(asignaturaID int) ([]models.ProyectoDocente, error) {
 	query := `
-		SELECT id, asignatura_id, version, estado, creacion, ultima_modificacion, docente_id
+		SELECT id, asignatura_id, version, estado, creacion, ultima_modificacion, docente_id, activo
 		FROM proyectos_docente
 		WHERE asignatura_id = $1
 		ORDER BY version DESC
@@ -207,7 +213,7 @@ func (r *ProyectoDocenteRepository) GetByAsignatura(asignaturaID int) ([]models.
 	for rows.Next() {
 		var pd models.ProyectoDocente
 		if err := rows.Scan(
-			&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion, &pd.DocenteID,
+			&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion, &pd.DocenteID, &pd.Activo,
 		); err != nil {
 			return nil, err
 		}
@@ -215,4 +221,38 @@ func (r *ProyectoDocenteRepository) GetByAsignatura(asignaturaID int) ([]models.
 	}
 
 	return proyectos, nil
+}
+
+func (r *ProyectoDocenteRepository) DeactivateAllForAsignatura(asignaturaID int) error {
+	query := "UPDATE proyectos_docente SET activo = FALSE WHERE asignatura_id = $1"
+	_, err := r.db.Exec(query, asignaturaID)
+	return err
+}
+
+func (r *ProyectoDocenteRepository) ActivateProject(id int) error {
+	query := "UPDATE proyectos_docente SET activo = TRUE WHERE id = $1"
+	_, err := r.db.Exec(query, id)
+	return err
+}
+
+func (r *ProyectoDocenteRepository) GetActiveByAsignatura(asignaturaID int) (*models.ProyectoDocente, error) {
+	query := `
+		SELECT id, asignatura_id, version, estado, creacion, ultima_modificacion, docente_id, activo
+		FROM proyectos_docente
+		WHERE asignatura_id = $1 AND activo = TRUE
+	`
+	row := r.db.QueryRow(query, asignaturaID)
+
+	var pd models.ProyectoDocente
+	err := row.Scan(
+		&pd.ID, &pd.AsignaturaID, &pd.Version, &pd.Estado, &pd.Creacion, &pd.UltimaModificacion, &pd.DocenteID, &pd.Activo,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &pd, nil
 }
