@@ -86,6 +86,7 @@ func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/auth/login", authHandler.Login).Methods("POST")
+	r.HandleFunc("/api/auth/register", authHandler.Register).Methods("POST")
 	r.HandleFunc("/api/auth/me", authMiddleware.Authenticate(authHandler.GetMe)).Methods("GET")
 
 	r.HandleFunc("/api/facultades", facultadHandler.GetAll).Methods("GET")

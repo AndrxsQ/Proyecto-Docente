@@ -264,6 +264,16 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+type RegisterRequest struct {
+	Nombre     string `json:"nombre"`
+	Apellido   string `json:"apellido"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	Rol        Rol    `json:"rol"`
+	ProgramaID *int   `json:"programa_id,omitempty"`
+	FacultadID *int   `json:"facultad_id,omitempty"`
+}
+
 type LoginResponse struct {
 	Token   string  `json:"token"`
 	Usuario Usuario `json:"usuario"`

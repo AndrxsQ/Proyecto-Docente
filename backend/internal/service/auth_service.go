@@ -50,6 +50,34 @@ func (s *AuthService) GetMe(userID int) (*models.Usuario, error) {
 	return s.authRepo.GetByID(userID)
 }
 
+func (s *AuthService) Register(req models.RegisterRequest) (*models.LoginResponse, error) {
+	// Verificar si el email ya existe
+	existingUser, err := s.authRepo.GetByEmail(req.Email)
+	if err != nil {
+		return nil, err
+	}
+	if existingUser != nil {
+		return nil, errors.New("el email ya está registrado")
+	}
+
+	// Crear el usuario
+	usuario, err := s.authRepo.Create(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generar token
+	token, err := s.generateToken(usuario)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.LoginResponse{
+		Token:   token,
+		Usuario: *usuario,
+	}, nil
+}
+
 func (s *AuthService) generateToken(usuario *models.Usuario) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": usuario.ID,
