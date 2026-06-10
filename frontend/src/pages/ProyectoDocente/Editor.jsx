@@ -124,7 +124,6 @@ const ProyectoDocenteEditor = () => {
     try {
       await saveFormato(proyecto.id, formato);
       alert('Formato guardado');
-      navigate('/proyectos-docente');
     } catch (error) {
       console.error('Error saving formato:', error);
     } finally {
