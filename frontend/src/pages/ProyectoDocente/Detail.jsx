@@ -88,6 +88,20 @@ const ProyectoDocenteDetail = () => {
     }
   };
 
+  const getAprobarButtonText = () => {
+    const grupo = getPermissionGroup(user.rol);
+    switch (grupo) {
+      case 'REVISION':
+        return 'Marcar como Revisado';
+      case 'COMITE':
+        return 'Avalar';
+      case 'APROBACION_FINAL':
+        return 'Aprobar';
+      default:
+        return 'Aprobar';
+    }
+  };
+
   return (
     <div className="p-8">
       <div className="sticky top-0 z-10 bg-white py-4 shadow-sm mb-4">
@@ -104,7 +118,7 @@ const ProyectoDocenteDetail = () => {
               onClick={handleAprobar}
               className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"
             >
-              Aprobar
+              {getAprobarButtonText()}
             </button>
           )}
         </div>
