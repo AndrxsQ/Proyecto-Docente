@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProyectoDocente, getSeguimiento, getContenido } from '../../api/proyectosDocente';
+import { getProyectoDocente, getSeguimiento, getContenido, aprobarProyectoDocente } from '../../api/proyectosDocente';
 import { ArrowLeft } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const ProyectoDocenteDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const [proyecto, setProyecto] = useState(null);
   const [seguimiento, setSeguimiento] = useState([]);
   const [contenido, setContenido] = useState([]);
@@ -40,15 +42,72 @@ const ProyectoDocenteDetail = () => {
     return acc + (seg.estado === 'CUMPLIDO' ? seg.porcentaje_avance : 0);
   }, 0) || 0;
 
+  const getPermissionGroup = (rol) => {
+    const groups = {
+      'DOCENTE': 'DOCENTE',
+      'JEFE_DEPARTAMENTO': 'REVISION',
+      'DIRECTOR_PROGRAMA': 'REVISION',
+      'COORDINADOR_PROGRAMA': 'REVISION',
+      'COMITE_CURRICULAR': 'COMITE',
+      'COMITE_ACADEMICO_INSTITUTO': 'COMITE',
+      'DECANO': 'APROBACION_FINAL',
+    };
+    return groups[rol] || '';
+  };
+
+  const canAprobar = (proyecto) => {
+    const grupo = getPermissionGroup(user.rol);
+    switch (grupo) {
+      case 'REVISION':
+        return proyecto.estado === 'EN_REVISION';
+      case 'COMITE':
+        return proyecto.estado === 'REVISADO';
+      case 'APROBACION_FINAL':
+        return proyecto.estado === 'AVALADO';
+      default:
+        return false;
+    }
+  };
+
+  const getNextEstado = (estado) => {
+    const nextStates = {
+      'EN_REVISION': 'REVISADO',
+      'REVISADO': 'AVALADO',
+      'AVALADO': 'APROBADO',
+    };
+    return nextStates[estado];
+  };
+
+  const handleAprobar = async () => {
+    try {
+      await aprobarProyectoDocente(proyecto.id, '');
+      fetchData();
+    } catch (error) {
+      console.error('Error approving proyecto:', error);
+      alert('Error al aprobar el proyecto');
+    }
+  };
+
   return (
     <div className="p-8">
       <div className="sticky top-0 z-10 bg-white py-4 shadow-sm mb-4">
-        <button onClick={() => window.history.back()} className="flex items-center text-[#4A4A4A] hover:text-[#1E1E1E]">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Volver
-        </button>
-
-        <h1 className="text-3xl font-bold text-[#1E1E1E] mt-2">{proyecto.asignatura?.nombre}</h1>
+        <div className="flex justify-between items-center">
+          <div>
+            <button onClick={() => window.history.back()} className="flex items-center text-[#4A4A4A] hover:text-[#1E1E1E] mb-2">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Volver
+            </button>
+            <h1 className="text-3xl font-bold text-[#1E1E1E]">{proyecto.asignatura?.nombre}</h1>
+          </div>
+          {canAprobar(proyecto) && (
+            <button
+              onClick={handleAprobar}
+              className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"
+            >
+              Aprobar
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="mb-4">

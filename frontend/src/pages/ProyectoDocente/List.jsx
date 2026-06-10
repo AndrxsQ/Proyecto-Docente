@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getProyectosDocentes, createProyectoDocente, aprobarProyectoDocente, enviarProyectoDocente } from '../../api/proyectosDocente';
+import { getProyectosDocentes, createProyectoDocente, enviarProyectoDocente } from '../../api/proyectosDocente';
 import { getAsignaturas } from '../../api/asignaturas';
 import { getFacultades } from '../../api/facultades';
 import { getProgramas } from '../../api/programas';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Eye, Edit, Check, Send } from 'lucide-react';
+import { Plus, Eye, Edit, Send } from 'lucide-react';
 
 const ProyectoDocenteList = () => {
   const [proyectos, setProyectos] = useState([]);
@@ -137,16 +137,6 @@ const ProyectoDocenteList = () => {
     }
   };
 
-  const handleAprobar = async (proyectoId) => {
-    try {
-      await aprobarProyectoDocente(proyectoId, '');
-      fetchData();
-    } catch (error) {
-      console.error('Error approving proyecto:', error);
-      alert('Error al aprobar el proyecto');
-    }
-  };
-
   const handleEnviar = async (proyectoId) => {
     try {
       await enviarProyectoDocente(proyectoId);
@@ -155,42 +145,6 @@ const ProyectoDocenteList = () => {
       console.error('Error sending proyecto:', error);
       alert('Error al enviar el proyecto');
     }
-  };
-
-  const getPermissionGroup = (rol) => {
-    const groups = {
-      'DOCENTE': 'DOCENTE',
-      'JEFE_DEPARTAMENTO': 'REVISION',
-      'DIRECTOR_PROGRAMA': 'REVISION',
-      'COORDINADOR_PROGRAMA': 'REVISION',
-      'COMITE_CURRICULAR': 'COMITE',
-      'COMITE_ACADEMICO_INSTITUTO': 'COMITE',
-      'DECANO': 'APROBACION_FINAL',
-    };
-    return groups[rol] || '';
-  };
-
-  const canAprobar = (proyecto) => {
-    const grupo = getPermissionGroup(user.rol);
-    switch (grupo) {
-      case 'REVISION':
-        return proyecto.estado === 'EN_REVISION';
-      case 'COMITE':
-        return proyecto.estado === 'REVISADO';
-      case 'APROBACION_FINAL':
-        return proyecto.estado === 'AVALADO';
-      default:
-        return false;
-    }
-  };
-
-  const getNextEstado = (estado) => {
-    const nextStates = {
-      'EN_REVISION': 'REVISADO',
-      'REVISADO': 'AVALADO',
-      'AVALADO': 'APROBADO',
-    };
-    return nextStates[estado];
   };
 
   const getEstadoBadge = (estado) => {
@@ -289,15 +243,6 @@ const ProyectoDocenteList = () => {
                             title="Enviar a revisión"
                           >
                             <Send className="w-4 h-4" />
-                          </button>
-                        )}
-                        {canAprobar(proyecto) && (
-                          <button
-                            onClick={() => handleAprobar(proyecto.id)}
-                            className="p-2 hover:bg-[#FFFBF2] rounded-lg text-[#F5A623]"
-                            title={`Aprobar - Pasar a ${getNextEstado(proyecto.estado).replace(/_/g, ' ')}`}
-                          >
-                            <Check className="w-4 h-4" />
                           </button>
                         )}
                       </div>
