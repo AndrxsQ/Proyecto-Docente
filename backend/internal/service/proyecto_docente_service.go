@@ -113,9 +113,9 @@ func (s *ProyectoDocenteService) Enviar(id int) error {
 
 	fmt.Printf("DEBUG SERVICE: Proyecto estado actual: %s\n", pd.Estado)
 
-	if pd.Estado != models.EstadoElaborado {
-		fmt.Printf("DEBUG SERVICE: Invalid state, expected ELABORADO\n")
-		return errors.New("solo se pueden enviar proyectos en estado ELABORADO")
+	if pd.Estado != models.EstadoElaborado && pd.Estado != models.EstadoDenegado {
+		fmt.Printf("DEBUG SERVICE: Invalid state, expected ELABORADO or DENEGADO\n")
+		return errors.New("solo se pueden enviar proyectos en estado ELABORADO o DENEGADO")
 	}
 
 	fmt.Printf("DEBUG SERVICE: Validating requisitos\n")

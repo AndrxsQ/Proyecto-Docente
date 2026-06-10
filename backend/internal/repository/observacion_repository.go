@@ -30,6 +30,7 @@ func (r *ObservacionRepository) GetByProyectoDocenteID(pdID int) ([]models.Obser
 	var observaciones []models.Observacion
 	for rows.Next() {
 		var o models.Observacion
+		o.Autor = &models.Usuario{}
 		if err := rows.Scan(
 			&o.ID, &o.ProyectoDocenteID, &o.AutorID, &o.Tipo, &o.Descripcion, &o.Fecha,
 			&o.Autor.Nombre, &o.Autor.Apellido, &o.Autor.Rol,

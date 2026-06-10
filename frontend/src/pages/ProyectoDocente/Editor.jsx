@@ -305,7 +305,7 @@ const ProyectoDocenteEditor = () => {
             <Save className="w-4 h-4 mr-2" />
             Guardar
           </button>
-          {proyecto && (proyecto.estado === 'ELABORADO') && (
+          {proyecto && (proyecto.estado === 'ELABORADO' || proyecto.estado === 'DENEGADO') && (
             <button
               onClick={handleEnviar}
               className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"

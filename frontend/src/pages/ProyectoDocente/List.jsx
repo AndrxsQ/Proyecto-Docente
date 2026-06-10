@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getProyectosDocentes, createProyectoDocente, enviarProyectoDocente } from '../../api/proyectosDocente';
+import { getProyectosDocentes, getProyectoDocente, createProyectoDocente, enviarProyectoDocente } from '../../api/proyectosDocente';
 import { getAsignaturas } from '../../api/asignaturas';
 import { getFacultades } from '../../api/facultades';
 import { getProgramas } from '../../api/programas';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Eye, Edit, Send } from 'lucide-react';
+import { Plus, Eye, Edit, Send, Bell } from 'lucide-react';
 
 const ProyectoDocenteList = () => {
   const [proyectos, setProyectos] = useState([]);
@@ -18,6 +18,8 @@ const ProyectoDocenteList = () => {
   const [selectedFacultad, setSelectedFacultad] = useState('');
   const [selectedPrograma, setSelectedPrograma] = useState('');
   const [sesionesPorSemana, setSesionesPorSemana] = useState(1);
+  const [showObservationsModal, setShowObservationsModal] = useState(false);
+  const [selectedProjectObservations, setSelectedProjectObservations] = useState([]);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -147,6 +149,17 @@ const ProyectoDocenteList = () => {
     }
   };
 
+  const handleShowObservations = async (proyecto) => {
+    try {
+      const proyectoData = await getProyectoDocente(proyecto.id);
+      setSelectedProjectObservations(proyectoData.observaciones || []);
+      setShowObservationsModal(true);
+    } catch (error) {
+      console.error('Error fetching observations:', error);
+      alert('Error al cargar las observaciones');
+    }
+  };
+
   const getEstadoBadge = (estado) => {
     const badges = {
       'ELABORADO': 'bg-[#F0F0F0] text-[#666666]',
@@ -228,7 +241,7 @@ const ProyectoDocenteList = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        {(user.rol === 'DOCENTE' || user.rol === 'ADMIN') && proyecto.estado !== 'APROBADO' && (
+                        {(user.rol === 'DOCENTE' || user.rol === 'ADMIN') && (proyecto.estado === 'ELABORADO' || proyecto.estado === 'DENEGADO') && (
                           <button
                             onClick={() => navigate(`/proyectos-docente/${proyecto.id}/edit`)}
                             className="p-2 hover:bg-[#F0F0F0] rounded-lg text-[#4A4A4A]"
@@ -237,13 +250,13 @@ const ProyectoDocenteList = () => {
                             <Edit className="w-4 h-4" />
                           </button>
                         )}
-                        {user.rol === 'DOCENTE' && proyecto.estado === 'ELABORADO' && (
+                        {proyecto.estado === 'DENEGADO' && (
                           <button
-                            onClick={() => handleEnviar(proyecto.id)}
-                            className="p-2 hover:bg-[#FFFBF2] rounded-lg text-[#F5A623]"
-                            title="Enviar a revisión"
+                            onClick={() => handleShowObservations(proyecto)}
+                            className="p-2 hover:bg-[#F0F0F0] rounded-lg text-[#4A4A4A]"
+                            title="Ver observaciones"
                           >
-                            <Send className="w-4 h-4" />
+                            <Bell className="w-4 h-4" />
                           </button>
                         )}
                       </div>
@@ -255,6 +268,43 @@ const ProyectoDocenteList = () => {
           </table>
         </div>
       </div>
+
+      {showObservationsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-[#1E1E1E]">Observaciones del Proyecto</h2>
+              <button
+                onClick={() => setShowObservationsModal(false)}
+                className="text-[#4A4A4A] hover:text-[#1E1E1E]"
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+            {selectedProjectObservations.length === 0 ? (
+              <p className="text-[#4A4A4A]">No hay observaciones registradas para este proyecto.</p>
+            ) : (
+              <div className="space-y-4">
+                {selectedProjectObservations.map((observacion) => (
+                  <div key={observacion.id} className="border border-[#E5E7EB] rounded-xl p-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <span className="text-sm font-semibold text-[#1E1E1E]">{observacion.tipo}</span>
+                        <p className="text-xs text-[#6B7280] mt-1">{new Date(observacion.fecha).toLocaleString()}</p>
+                      </div>
+                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-[#F3F4F6] text-[#4A4A4A]">
+                        {observacion.autor ? `${observacion.autor.nombre} ${observacion.autor.apellido}` : 'Sin autor'}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-[#4A4A4A] whitespace-pre-line">{observacion.descripcion || 'Sin descripción'}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showNewModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
