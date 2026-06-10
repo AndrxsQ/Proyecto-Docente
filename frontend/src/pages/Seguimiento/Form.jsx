@@ -180,21 +180,25 @@ const SeguimientoForm = () => {
               onChange={(e) => {
                 const semana = parseInt(e.target.value);
                 setCurrentSemana(semana);
-                // Find the first session for this week
+                // Find the first session for this week without seguimiento
                 const firstSession = contenido
                   .filter(c => c.semana === semana)
-                  .sort((a, b) => a.sesion - b.sesion)[0];
+                  .sort((a, b) => a.sesion - b.sesion)
+                  .find(c => !seguimiento.some(seg => seg.semana === c.semana && seg.sesion === c.sesion));
                 if (firstSession) {
                   setCurrentSesion(firstSession.sesion);
                 }
               }}
               className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
             >
-              {[...new Set(contenido.map(c => c.semana))].sort((a, b) => a - b).map(semana => (
-                <option key={semana} value={semana}>
-                  Semana {semana}
-                </option>
-              ))}
+              {[...new Set(contenido.map(c => c.semana))]
+                .filter(semana => contenido.some(c => c.semana === semana && !seguimiento.some(seg => seg.semana === c.semana && seg.sesion === c.sesion)))
+                .sort((a, b) => a - b)
+                .map(semana => (
+                  <option key={semana} value={semana}>
+                    Semana {semana}
+                  </option>
+                ))}
             </select>
           </div>
           <div>
@@ -205,7 +209,7 @@ const SeguimientoForm = () => {
               className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
             >
               {contenido
-                .filter(c => c.semana === currentSemana)
+                .filter(c => c.semana === currentSemana && !seguimiento.some(seg => seg.semana === c.semana && seg.sesion === c.sesion))
                 .sort((a, b) => a.sesion - b.sesion)
                 .map(c => (
                   <option key={c.id} value={c.sesion}>
