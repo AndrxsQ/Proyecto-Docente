@@ -37,12 +37,14 @@ const ProyectoDocenteDetail = () => {
 
   return (
     <div className="p-8">
-      <button onClick={() => window.history.back()} className="flex items-center text-[#4A4A4A] hover:text-[#1E1E1E] mb-4">
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Volver
-      </button>
+      <div className="sticky top-0 z-10 bg-white py-4 shadow-sm mb-4">
+        <button onClick={() => window.history.back()} className="flex items-center text-[#4A4A4A] hover:text-[#1E1E1E]">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Volver
+        </button>
 
-      <h1 className="text-3xl font-bold text-[#1E1E1E] mb-6">{proyecto.asignatura?.nombre}</h1>
+        <h1 className="text-3xl font-bold text-[#1E1E1E] mt-2">{proyecto.asignatura?.nombre}</h1>
+      </div>
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">

@@ -55,7 +55,9 @@ const ProyectoDocenteReview = () => {
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold text-[#1E1E1E] mb-6">Revisión de <span className="text-[#F5A623]">Proyecto</span> Docente</h1>
+      <div className="sticky top-0 z-10 bg-white py-4 shadow-sm mb-6">
+        <h1 className="text-3xl font-bold text-[#1E1E1E]">Revisión de <span className="text-[#F5A623]">Proyecto</span> Docente</h1>
+      </div>
       
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
         <h2 className="text-xl font-semibold text-[#1E1E1E] mb-4">{proyecto.asignatura?.nombre}</h2>

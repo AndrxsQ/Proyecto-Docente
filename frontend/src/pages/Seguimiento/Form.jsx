@@ -156,7 +156,7 @@ const SeguimientoForm = () => {
 
   return (
     <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 sticky top-0 z-10 bg-white py-4 shadow-sm">
         <h1 className="text-3xl font-bold text-[#1E1E1E]">Nuevo Registro de Seguimiento - <span className="text-[#F5A623]">{proyecto.asignatura?.nombre}</span></h1>
         <div className="flex gap-2">
           <button
