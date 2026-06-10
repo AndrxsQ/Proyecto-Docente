@@ -212,6 +212,67 @@ func (s *ProyectoDocenteService) Aprobar(id int, rol models.Rol, autorID int, ob
 	return nil
 }
 
+func (s *ProyectoDocenteService) Denegar(id int, rol models.Rol, autorID int, observacion string) error {
+	fmt.Printf("DEBUG SERVICE: Denegar called - ID: %d, Rol: %s, AutorID: %d\n", id, rol, autorID)
+
+	pd, err := s.pdRepo.GetByID(id)
+	if err != nil {
+		fmt.Printf("DEBUG SERVICE: Error getting proyecto: %v\n", err)
+		return err
+	}
+	if pd == nil {
+		fmt.Printf("DEBUG SERVICE: Proyecto not found\n")
+		return errors.New("proyecto docente no encontrado")
+	}
+
+	fmt.Printf("DEBUG SERVICE: Proyecto estado actual: %s\n", pd.Estado)
+
+	grupo := rol.GetGrupo()
+	fmt.Printf("DEBUG SERVICE: User permission group: %s\n", grupo)
+
+	// Check if user can deny (same groups as approve)
+	switch grupo {
+	case models.GrupoRevision, models.GrupoComite, models.GrupoAprobacionFinal:
+		// All these groups can deny
+	default:
+		fmt.Printf("DEBUG SERVICE: Unauthorized group: %s\n", grupo)
+		return errors.New("grupo no autorizado para denegar")
+	}
+
+	// Check if project is in a state that can be denied
+	if pd.Estado == models.EstadoElaborado {
+		return errors.New("no se puede denegar un proyecto en estado ELABORADO")
+	}
+	if pd.Estado == models.EstadoAprobado {
+		return errors.New("no se puede denegar un proyecto ya aprobado")
+	}
+	if pd.Estado == models.EstadoDenegado {
+		return errors.New("el proyecto ya está denegado")
+	}
+
+	fmt.Printf("DEBUG SERVICE: New state will be: DENEGADO\n")
+
+	pd.Estado = models.EstadoDenegado
+	pd.UltimaModificacion = time.Now()
+	if err := s.pdRepo.Update(pd); err != nil {
+		fmt.Printf("DEBUG SERVICE: Error updating proyecto: %v\n", err)
+		return err
+	}
+
+	// Always create an observation for denial
+	obs := &models.Observacion{
+		ProyectoDocenteID: id,
+		AutorID:           autorID,
+		Tipo:              models.TipoObservacionDenegacion,
+		Descripcion:       observacion,
+		Fecha:             time.Now(),
+	}
+	s.observacionRepo.Create(obs)
+
+	fmt.Printf("DEBUG SERVICE: Denegar successful\n")
+	return nil
+}
+
 func (s *ProyectoDocenteService) validarRequisitos(pdID int) error {
 	formato, err := s.formatoRepo.GetByProyectoDocenteID(pdID)
 	if err != nil {

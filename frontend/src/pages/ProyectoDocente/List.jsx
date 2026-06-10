@@ -154,6 +154,7 @@ const ProyectoDocenteList = () => {
       'REVISADO': 'bg-[#FEF3C7] text-[#92600A]',
       'AVALADO': 'bg-[#DBEAFE] text-[#1E40AF]',
       'APROBADO': 'bg-[#D1FAE5] text-[#065F46]',
+      'DENEGADO': 'bg-[#FEE2E2] text-[#991B1B]',
     };
     return badges[estado] || 'bg-[#F0F0F0] text-[#666666]';
   };

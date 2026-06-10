@@ -116,6 +116,7 @@ func main() {
 	r.HandleFunc("/api/proyectos-docentes", authMiddleware.Authenticate(pdHandler.Create)).Methods("POST")
 	r.HandleFunc("/api/proyectos-docentes/{id}/enviar", authMiddleware.Authenticate(pdHandler.Enviar)).Methods("POST")
 	r.HandleFunc("/api/proyectos-docentes/{id}/aprobar", authMiddleware.Authenticate(pdHandler.Aprobar)).Methods("POST")
+	r.HandleFunc("/api/proyectos-docentes/{id}/denegar", authMiddleware.Authenticate(pdHandler.Denegar)).Methods("POST")
 
 	r.HandleFunc("/api/proyectos-docentes/{id}/formato", authMiddleware.Authenticate(formatoHandler.GetByProyectoDocenteID)).Methods("GET")
 	r.HandleFunc("/api/proyectos-docentes/{id}/formato", authMiddleware.Authenticate(formatoHandler.CreateOrUpdate)).Methods("POST", "PUT")

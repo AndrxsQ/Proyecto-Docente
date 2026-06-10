@@ -25,6 +25,11 @@ export const aprobarProyectoDocente = async (id, observacion) => {
   return response.data;
 };
 
+export const denegarProyectoDocente = async (id, observacion) => {
+  const response = await api.post(`/proyectos-docentes/${id}/denegar`, { observacion });
+  return response.data;
+};
+
 export const devolverProyectoDocente = async (id, observacion) => {
   const response = await api.post(`/proyectos-docentes/${id}/devolver`, { observacion });
   return response.data;

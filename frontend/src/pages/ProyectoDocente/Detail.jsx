@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProyectoDocente, getSeguimiento, getContenido, aprobarProyectoDocente } from '../../api/proyectosDocente';
+import { getProyectoDocente, getSeguimiento, getContenido, aprobarProyectoDocente, denegarProyectoDocente } from '../../api/proyectosDocente';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -12,6 +12,8 @@ const ProyectoDocenteDetail = () => {
   const [contenido, setContenido] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Información');
+  const [showDenyModal, setShowDenyModal] = useState(false);
+  const [denyObservation, setDenyObservation] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -88,6 +90,37 @@ const ProyectoDocenteDetail = () => {
     }
   };
 
+  const canDenegar = (proyecto) => {
+    const grupo = getPermissionGroup(user.rol);
+    // Same groups as approve can deny
+    switch (grupo) {
+      case 'REVISION':
+        return proyecto.estado === 'EN_REVISION';
+      case 'COMITE':
+        return proyecto.estado === 'REVISADO';
+      case 'APROBACION_FINAL':
+        return proyecto.estado === 'AVALADO';
+      default:
+        return false;
+    }
+  };
+
+  const handleDenegar = async () => {
+    if (!denyObservation.trim()) {
+      alert('Por favor ingrese una observación para denegar el proyecto');
+      return;
+    }
+    try {
+      await denegarProyectoDocente(proyecto.id, denyObservation);
+      setShowDenyModal(false);
+      setDenyObservation('');
+      fetchData();
+    } catch (error) {
+      console.error('Error denying proyecto:', error);
+      alert('Error al denegar el proyecto');
+    }
+  };
+
   const getAprobarButtonText = () => {
     const grupo = getPermissionGroup(user.rol);
     switch (grupo) {
@@ -113,14 +146,24 @@ const ProyectoDocenteDetail = () => {
             </button>
             <h1 className="text-3xl font-bold text-[#1E1E1E]">{proyecto.asignatura?.nombre}</h1>
           </div>
-          {canAprobar(proyecto) && (
-            <button
-              onClick={handleAprobar}
-              className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"
-            >
-              {getAprobarButtonText()}
-            </button>
-          )}
+          <div className="flex gap-2">
+            {canDenegar(proyecto) && (
+              <button
+                onClick={() => setShowDenyModal(true)}
+                className="flex items-center bg-[#E53E3E] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#C53030] transition-colors"
+              >
+                Denegar
+              </button>
+            )}
+            {canAprobar(proyecto) && (
+              <button
+                onClick={handleAprobar}
+                className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"
+              >
+                {getAprobarButtonText()}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -372,6 +415,41 @@ const ProyectoDocenteDetail = () => {
           </div>
         )}
       </div>
+
+      {showDenyModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+            <h2 className="text-xl font-bold text-[#1E1E1E] mb-4">Denegar Proyecto Docente</h2>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Observación</label>
+              <textarea
+                value={denyObservation}
+                onChange={(e) => setDenyObservation(e.target.value)}
+                className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#E53E3E] focus:ring-3 focus:ring-[#E53E3E]/15 placeholder-[#AAAAAA] h-32"
+                placeholder="Indique la razón de la denegación..."
+                required
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => {
+                  setShowDenyModal(false);
+                  setDenyObservation('');
+                }}
+                className="px-4 py-2 border border-[#E53E3E] text-[#E53E3E] rounded-lg hover:bg-[#FEF2F2] transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDenegar}
+                className="px-4 py-2 bg-[#E53E3E] text-white font-semibold rounded-lg hover:bg-[#C53030] transition-colors"
+              >
+                Denegar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

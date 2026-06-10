@@ -9,6 +9,8 @@ import (
 	"proyecto-docente/internal/auth"
 	"proyecto-docente/internal/models"
 	"proyecto-docente/internal/service"
+
+	"github.com/gorilla/mux"
 )
 
 type ProyectoDocenteHandler struct {
@@ -106,7 +108,9 @@ func (h *ProyectoDocenteHandler) Enviar(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	id, err := strconv.Atoi(r.URL.Path[len("/api/proyectos-docentes/") : len(r.URL.Path)-len("/enviar")])
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
@@ -130,7 +134,9 @@ func (h *ProyectoDocenteHandler) Aprobar(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	id, err := strconv.Atoi(r.URL.Path[len("/api/proyectos-docentes/") : len(r.URL.Path)-len("/aprobar")])
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
@@ -155,4 +161,39 @@ func (h *ProyectoDocenteHandler) Aprobar(w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Proyecto aprobado"})
+}
+
+func (h *ProyectoDocenteHandler) Denegar(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	var req models.DenegarRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	userRol := auth.GetUserRol(r)
+	userID := auth.GetUserID(r)
+
+	fmt.Printf("DEBUG: Denegar - ID: %d, Rol: %s, UserID: %d\n", id, userRol, userID)
+
+	if err := h.pdService.Denegar(id, userRol, userID, req.Observacion); err != nil {
+		fmt.Printf("DEBUG: Error in Denegar: %v\n", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Proyecto denegado"})
 }

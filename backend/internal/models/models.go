@@ -48,6 +48,7 @@ const (
 	EstadoRevisado   EstadoPD = "REVISADO"
 	EstadoAvalado    EstadoPD = "AVALADO"
 	EstadoAprobado   EstadoPD = "APROBADO"
+	EstadoDenegado   EstadoPD = "DENEGADO"
 )
 
 type EstadoRevision string
@@ -71,6 +72,7 @@ const (
 	TipoObservacionDevolucion TipoObservacion = "DEVOLUCION"
 	TipoObservacionComentario TipoObservacion = "COMENTARIO"
 	TipoObservacionAprobacion TipoObservacion = "APROBACION"
+	TipoObservacionDenegacion TipoObservacion = "DENEGACION"
 )
 
 type EstadoSeguimiento string
@@ -288,5 +290,9 @@ type AprobarRequest struct {
 }
 
 type DevolverRequest struct {
+	Observacion string `json:"observacion"`
+}
+
+type DenegarRequest struct {
 	Observacion string `json:"observacion"`
 }
