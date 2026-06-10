@@ -273,7 +273,7 @@ const ProyectoDocenteList = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        {(user.rol === 'DOCENTE' || user.rol === 'ADMIN') && (
+                        {(user.rol === 'DOCENTE' || user.rol === 'ADMIN') && proyecto.estado !== 'APROBADO' && (
                           <button
                             onClick={() => navigate(`/proyectos-docente/${proyecto.id}/edit`)}
                             className="p-2 hover:bg-[#F0F0F0] rounded-lg text-[#4A4A4A]"
