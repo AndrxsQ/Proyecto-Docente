@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserPlus, GraduationCap, Mail, Lock, User, Building2 } from 'lucide-react';
+import { getFacultades } from '../api/facultades';
+import { getProgramas } from '../api/programas';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -14,15 +16,55 @@ const Register = () => {
     programa_id: '',
     facultad_id: ''
   });
+  const [facultades, setFacultades] = useState([]);
+  const [programas, setProgramas] = useState([]);
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const loadFacultades = async () => {
+      try {
+        const data = await getFacultades();
+        setFacultades(data);
+      } catch (err) {
+        console.error('Error loading facultades:', err);
+      }
+    };
+    loadFacultades();
+  }, []);
+
+  useEffect(() => {
+    const loadProgramas = async () => {
+      if (formData.facultad_id) {
+        try {
+          const data = await getProgramas({ facultad_id: formData.facultad_id });
+          setProgramas(data);
+        } catch (err) {
+          console.error('Error loading programas:', err);
+        }
+      } else {
+        setProgramas([]);
+      }
+    };
+    loadProgramas();
+  }, [formData.facultad_id]);
+
   const handleChange = (e) => {
+    const value = e.target.value;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     });
+    
+    // Limpiar programa_id cuando cambia facultad_id
+    if (e.target.name === 'facultad_id') {
+      setFormData(prev => ({
+        ...prev,
+        facultad_id: value,
+        programa_id: ''
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -171,32 +213,33 @@ const Register = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">ID Programa (opcional)</label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#AAAAAA]" />
-                  <input
-                    type="number"
-                    name="programa_id"
-                    value={formData.programa_id}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
-                    placeholder="ID del programa"
-                  />
-                </div>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Facultad (opcional)</label>
+                <select
+                  name="facultad_id"
+                  value={formData.facultad_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
+                >
+                  <option value="">Selecciona una facultad</option>
+                  {facultades.map(facultad => (
+                    <option key={facultad.id} value={facultad.id}>{facultad.nombre}</option>
+                  ))}
+                </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">ID Facultad (opcional)</label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#AAAAAA]" />
-                  <input
-                    type="number"
-                    name="facultad_id"
-                    value={formData.facultad_id}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 placeholder-[#AAAAAA]"
-                    placeholder="ID de la facultad"
-                  />
-                </div>
+                <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Programa (opcional)</label>
+                <select
+                  name="programa_id"
+                  value={formData.programa_id}
+                  onChange={handleChange}
+                  disabled={!formData.facultad_id}
+                  className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">Selecciona un programa</option>
+                  {programas.map(programa => (
+                    <option key={programa.id} value={programa.id}>{programa.nombre}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
