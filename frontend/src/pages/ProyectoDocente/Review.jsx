@@ -87,15 +87,43 @@ const ProyectoDocenteReview = () => {
         </div>
       )}
 
-      {proyecto.contenido && proyecto.contenido.length > 0 && (
+      {proyecto.asignatura && (
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Contenido de la Asignatura</h3>
-          {proyecto.contenido.map((item) => (
-            <div key={item.id} className="border-b border-[#F0F0F0] py-3">
-              <p className="font-semibold text-[#1E1E1E]">Semana {item.semana}: {item.tema}</p>
-              <p className="text-[#4A4A4A] text-sm">{item.descripcion}</p>
-            </div>
-          ))}
+          {(() => {
+            const numSemanas = proyecto.asignatura?.semanas || 16;
+            const sesionesPorSemana = proyecto?.sesiones_por_semana || 1;
+            const contenidoMap = (proyecto.contenido || []).reduce((map, item) => {
+              map[`${item.semana}-${item.sesion}`] = item;
+              return map;
+            }, {});
+
+            const fullContent = [];
+            for (let semana = 1; semana <= numSemanas; semana++) {
+              for (let sesion = 1; sesion <= sesionesPorSemana; sesion++) {
+                const key = `${semana}-${sesion}`;
+                fullContent.push({
+                  semana,
+                  sesion,
+                  contenido: contenidoMap[key] || null,
+                });
+              }
+            }
+
+            return fullContent.map((item) => (
+              <div key={`${item.semana}-${item.sesion}`} className="border-b border-[#F0F0F0] py-3">
+                <p className="font-semibold text-[#1E1E1E]">Semana {item.semana} - Sesión {item.sesion}</p>
+                {item.contenido ? (
+                  <>
+                    <p className="text-[#4A4A4A] text-sm">{item.contenido.tema}</p>
+                    <p className="text-[#4A4A4A] text-sm">{item.contenido.descripcion}</p>
+                  </>
+                ) : (
+                  <p className="text-[#6B7280] text-sm">Sin contenido registrado para esta sesión</p>
+                )}
+              </div>
+            ));
+          })()}
         </div>
       )}
 

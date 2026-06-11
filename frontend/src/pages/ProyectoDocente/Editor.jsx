@@ -24,9 +24,6 @@ const ProyectoDocenteEditor = () => {
     } else {
       setLoading(false);
     }
-    return () => {
-      cleanupBlankItems();
-    };
   }, [id]);
 
   useEffect(() => {
@@ -41,33 +38,6 @@ const ProyectoDocenteEditor = () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [formato]);
-
-  const cleanupBlankItems = async () => {
-    if (!proyecto || id === 'new') return;
-
-    const blankContenido = contenido.filter(c => !c.tema || !c.descripcion);
-    const blankBibliografia = bibliografia.filter(b => !b.referencia);
-
-    for (const item of blankContenido) {
-      if (typeof item.id === 'number' && item.id < 1000000) {
-        try {
-          await deleteContenido(proyecto.id, item.id);
-        } catch (error) {
-          console.error('Error deleting blank contenido:', error);
-        }
-      }
-    }
-
-    for (const item of blankBibliografia) {
-      if (typeof item.id === 'number' && item.id < 1000000) {
-        try {
-          await deleteBibliografia(proyecto.id, item.id);
-        } catch (error) {
-          console.error('Error deleting blank bibliografia:', error);
-        }
-      }
-    }
-  };
 
   const fetchData = async () => {
     try {
@@ -102,7 +72,7 @@ const ProyectoDocenteEditor = () => {
         }
         setContenido(generatedContenido);
       } else {
-        setContenido((contenidoData || []).filter(c => c.tema && c.descripcion));
+        setContenido(contenidoData || []);
       }
       
       setBibliografia((bibliografiaData || []).filter(b => b.referencia));

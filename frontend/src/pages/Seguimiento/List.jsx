@@ -45,8 +45,8 @@ const SeguimientoList = () => {
         getFacultades(),
         getProgramas()
       ]);
-      setProyectos(proyectosData);
-      setFacultades(facultadesData);
+      setProyectos(proyectosData || []);
+      setFacultades(facultadesData || []);
       
       // Set default values based on user's programa if docente
       let defaultFacultadId = '';
@@ -69,7 +69,7 @@ const SeguimientoList = () => {
         const filteredProgramas = programasData?.filter(p => p.facultad_id === parseInt(defaultFacultadId)) || [];
         setProgramas(filteredProgramas);
       } else {
-        setProgramas(programasData);
+        setProgramas(programasData || []);
       }
       
       // Filter asignaturas based on programa
@@ -77,7 +77,7 @@ const SeguimientoList = () => {
         const filteredAsignaturas = asignaturasData?.filter(a => a.programa_id === parseInt(defaultProgramaId)) || [];
         setAsignaturas(filteredAsignaturas);
       } else {
-        setAsignaturas(asignaturasData);
+        setAsignaturas(asignaturasData || []);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -143,7 +143,7 @@ const SeguimientoList = () => {
 
   const handleNuevoSeguimiento = () => {
     if (selectedAsignatura) {
-      const proyecto = proyectos.find(p => p.asignatura_id === parseInt(selectedAsignatura));
+      const proyecto = (proyectos || []).find(p => p.asignatura_id === parseInt(selectedAsignatura));
       if (proyecto) {
         navigate(`/seguimiento/${proyecto.id}`);
       }
@@ -151,7 +151,7 @@ const SeguimientoList = () => {
   };
 
   // Filter proyectos based on selected filters
-  const filteredProyectos = proyectos.filter((proyecto) => {
+  const filteredProyectos = (proyectos || []).filter((proyecto) => {
     if (selectedAsignatura) {
       return proyecto.asignatura_id === parseInt(selectedAsignatura);
     }

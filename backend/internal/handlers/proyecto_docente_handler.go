@@ -83,16 +83,17 @@ func (h *ProyectoDocenteHandler) Create(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var req struct {
-		AsignaturaID      int `json:"asignatura_id"`
-		DocenteID         int `json:"docente_id"`
-		SesionesPorSemana int `json:"sesiones_por_semana"`
+		AsignaturaID      int  `json:"asignatura_id"`
+		DocenteID         int  `json:"docente_id"`
+		SesionesPorSemana int  `json:"sesiones_por_semana"`
+		CopyPrevious      bool `json:"copy_previous"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	pd, err := h.pdService.Create(req.AsignaturaID, req.DocenteID, req.SesionesPorSemana)
+	pd, err := h.pdService.Create(req.AsignaturaID, req.DocenteID, req.SesionesPorSemana, req.CopyPrevious)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

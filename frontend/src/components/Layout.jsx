@@ -1,10 +1,26 @@
+import { useState, useRef } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Home, FileText, ClipboardList, Settings, LogOut, User, GraduationCap } from 'lucide-react';
+import { Home, FileText, ClipboardList, Settings, LogOut, User, GraduationCap, ArrowUp } from 'lucide-react';
 
 const Layout = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const mainRef = useRef(null);
+
+  const handleScroll = () => {
+    if (!mainRef.current) return;
+    setShowScrollTop(mainRef.current.scrollTop > 250);
+  };
+
+  const scrollToTop = () => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const isActive = (path) => location.pathname === path;
 
@@ -77,8 +93,17 @@ const Layout = () => {
           </button>
         </div>
       </aside>
-      <main className="flex-1 ml-72 overflow-y-auto">
+      <main ref={mainRef} onScroll={handleScroll} className="flex-1 ml-72 overflow-y-auto relative">
         <Outlet />
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className="fixed right-6 bottom-6 z-50 p-3 rounded-full bg-[#F5A623] text-[#1E1E1E] shadow-lg hover:bg-[#E09415] transition-colors"
+            aria-label="Volver arriba"
+          >
+            <ArrowUp className="w-5 h-5" />
+          </button>
+        )}
       </main>
     </div>
   );

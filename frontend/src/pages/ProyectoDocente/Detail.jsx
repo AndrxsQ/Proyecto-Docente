@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getProyectoDocente, getSeguimiento, getContenido, aprobarProyectoDocente, denegarProyectoDocente } from '../../api/proyectosDocente';
+import { getResultadosAprendizajeCurso } from '../../api/resultadosAprendizajeCurso';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -10,6 +11,7 @@ const ProyectoDocenteDetail = () => {
   const [proyecto, setProyecto] = useState(null);
   const [seguimiento, setSeguimiento] = useState([]);
   const [contenido, setContenido] = useState([]);
+  const [resultadosAprendizajeCurso, setResultadosAprendizajeCurso] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Información');
   const [showDenyModal, setShowDenyModal] = useState(false);
@@ -21,18 +23,21 @@ const ProyectoDocenteDetail = () => {
 
   const fetchData = async () => {
     try {
-      const [proyectoData, seguimientoData, contenidoData] = await Promise.all([
+      const [proyectoData, seguimientoData, contenidoData, resultadosData] = await Promise.all([
         getProyectoDocente(id),
         getSeguimiento(id),
-        getContenido(id)
+        getContenido(id),
+        getResultadosAprendizajeCurso(id)
       ]);
       setProyecto(proyectoData);
       setSeguimiento(seguimientoData || []);
       setContenido(contenidoData || []);
+      setResultadosAprendizajeCurso(resultadosData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       setSeguimiento([]);
       setContenido([]);
+      setResultadosAprendizajeCurso([]);
     } finally {
       setLoading(false);
     }
@@ -282,6 +287,21 @@ const ProyectoDocenteDetail = () => {
                 <p className="text-[#4A4A4A] mb-4">{proyecto.formato.descripcion}</p>
                 <h3 className="text-lg font-semibold text-[#1E1E1E] mb-2">Resultados de Aprendizaje</h3>
                 <p className="text-[#4A4A4A] mb-4 whitespace-pre-wrap">{proyecto.formato.resultados_aprendizaje}</p>
+
+                {resultadosAprendizajeCurso && resultadosAprendizajeCurso.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Contribuciones a Resultados de Aprendizaje</h3>
+                    <div className="space-y-4">
+                      {resultadosAprendizajeCurso.map((item) => (
+                        <div key={item.id} className="border border-[#F0F0F0] p-4 rounded-xl">
+                          <p className="font-semibold text-[#1E1E1E] mb-2">{item.resultado_aprendizaje?.codigo || 'Resultado de Aprendizaje'} - {item.resultado_aprendizaje?.descripcion || 'No definido'}</p>
+                          <p className="text-[#4A4A4A] text-sm whitespace-pre-wrap">{item.contribucion_programa}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <h3 className="text-lg font-semibold text-[#1E1E1E] mb-2">Estrategias</h3>
                 <p className="text-[#4A4A4A] mb-4 whitespace-pre-wrap">{proyecto.formato.estrategias}</p>
                 <h3 className="text-lg font-semibold text-[#1E1E1E] mb-2">Evaluación</h3>
@@ -289,15 +309,43 @@ const ProyectoDocenteDetail = () => {
               </div>
             )}
 
-            {proyecto.contenido && proyecto.contenido.length > 0 && (
+            {proyecto.asignatura && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Contenido de la Asignatura</h3>
-                {proyecto.contenido.map((item) => (
-                  <div key={item.id} className="border-b border-[#F0F0F0] py-3">
-                    <p className="font-semibold text-[#1E1E1E]">Semana {item.semana}: {item.tema}</p>
-                    <p className="text-[#4A4A4A] text-sm">{item.descripcion}</p>
-                  </div>
-                ))}
+                {(() => {
+                  const numSemanas = proyecto.asignatura?.semanas || 16;
+                  const sesionesPorSemana = proyecto?.sesiones_por_semana || 1;
+                  const contenidoMap = (proyecto.contenido || []).reduce((map, item) => {
+                    map[`${item.semana}-${item.sesion}`] = item;
+                    return map;
+                  }, {});
+
+                  const fullContent = [];
+                  for (let semana = 1; semana <= numSemanas; semana++) {
+                    for (let sesion = 1; sesion <= sesionesPorSemana; sesion++) {
+                      const key = `${semana}-${sesion}`;
+                      fullContent.push({
+                        semana,
+                        sesion,
+                        contenido: contenidoMap[key] || null,
+                      });
+                    }
+                  }
+
+                  return fullContent.map((item) => (
+                    <div key={`${item.semana}-${item.sesion}`} className="border-b border-[#F0F0F0] py-3">
+                      <p className="font-semibold text-[#1E1E1E]">Semana {item.semana} - Sesión {item.sesion}</p>
+                      {item.contenido ? (
+                        <>
+                          <p className="text-[#4A4A4A] text-sm">{item.contenido.tema}</p>
+                          <p className="text-[#4A4A4A] text-sm">{item.contenido.descripcion}</p>
+                        </>
+                      ) : (
+                        <p className="text-[#6B7280] text-sm">Sin contenido registrado para esta sesión</p>
+                      )}
+                    </div>
+                  ));
+                })()}
               </div>
             )}
 

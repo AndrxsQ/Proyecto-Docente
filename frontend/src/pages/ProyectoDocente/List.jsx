@@ -18,6 +18,7 @@ const ProyectoDocenteList = () => {
   const [selectedFacultad, setSelectedFacultad] = useState('');
   const [selectedPrograma, setSelectedPrograma] = useState('');
   const [sesionesPorSemana, setSesionesPorSemana] = useState(1);
+  const [copyPreviousVersion, setCopyPreviousVersion] = useState(false);
   const [showObservationsModal, setShowObservationsModal] = useState(false);
   const [selectedProjectObservations, setSelectedProjectObservations] = useState([]);
   const { user } = useAuth();
@@ -124,15 +125,36 @@ const ProyectoDocenteList = () => {
     }
   };
 
+  const loadPreviousSesiones = async (asignaturaId) => {
+    if (!asignaturaId) return;
+    try {
+      const proyectosData = await getProyectosDocentes({ asignatura_id: asignaturaId });
+      if (proyectosData && proyectosData.length > 0) {
+        const previousProject = proyectosData[0];
+        setSesionesPorSemana(previousProject.sesiones_por_semana || 1);
+      }
+    } catch (error) {
+      console.error('Error loading previous project sessions:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (copyPreviousVersion && selectedAsignatura) {
+      loadPreviousSesiones(parseInt(selectedAsignatura));
+    }
+  }, [copyPreviousVersion, selectedAsignatura]);
+
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
       await createProyectoDocente({ 
         asignatura_id: parseInt(selectedAsignatura), 
         docente_id: user.id,
-        sesiones_por_semana: sesionesPorSemana
+        sesiones_por_semana: sesionesPorSemana,
+        copy_previous: copyPreviousVersion,
       });
       setShowNewModal(false);
+      setCopyPreviousVersion(false);
       fetchData();
     } catch (error) {
       console.error('Error creating proyecto:', error);
@@ -187,7 +209,10 @@ const ProyectoDocenteList = () => {
         <h1 className="text-3xl font-bold text-[#1E1E1E]">Proyectos <span className="text-[#F5A623]">Docente</span></h1>
         {user.rol === 'DOCENTE' && (
           <button
-            onClick={() => setShowNewModal(true)}
+            onClick={() => {
+              setCopyPreviousVersion(false);
+              setShowNewModal(true);
+            }}
             className="flex items-center bg-[#F5A623] text-[#1E1E1E] font-semibold px-4 py-2 rounded-lg hover:bg-[#E09415] transition-colors"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -348,7 +373,13 @@ const ProyectoDocenteList = () => {
                 <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Asignatura</label>
                 <select
                   value={selectedAsignatura}
-                  onChange={(e) => setSelectedAsignatura(e.target.value)}
+                  onChange={async (e) => {
+                    const asignaturaId = e.target.value;
+                    setSelectedAsignatura(asignaturaId);
+                    if (copyPreviousVersion && asignaturaId) {
+                      await loadPreviousSesiones(parseInt(asignaturaId));
+                    }
+                  }}
                   className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
                   required
                   disabled={!selectedPrograma}
@@ -371,7 +402,31 @@ const ProyectoDocenteList = () => {
                   onChange={(e) => setSesionesPorSemana(parseInt(e.target.value) || 1)}
                   className="w-full px-4 py-3 border border-[#D0D0D0] rounded-lg focus:outline-none focus:border-[#F5A623] focus:ring-3 focus:ring-[#F5A623]/15"
                   required
+                  disabled={copyPreviousVersion}
                 />
+                {copyPreviousVersion && (
+                  <p className="text-sm text-[#6B7280] mt-2">
+                    Se creará con {sesionesPorSemana} sesiones por semana según la versión anterior.
+                  </p>
+                )}
+              </div>
+              <div className="mb-4 flex items-center gap-3">
+                <input
+                  id="copyPreviousVersion"
+                  type="checkbox"
+                  checked={copyPreviousVersion}
+                  onChange={async (e) => {
+                    const checked = e.target.checked;
+                    setCopyPreviousVersion(checked);
+                    if (checked && selectedAsignatura) {
+                      await loadPreviousSesiones(parseInt(selectedAsignatura));
+                    }
+                  }}
+                  className="h-4 w-4 text-[#F5A623] border-[#D0D0D0] rounded focus:ring-[#F5A623]"
+                />
+                <label htmlFor="copyPreviousVersion" className="text-sm text-[#2C2C2C]">
+                  Copiar información de la versión anterior de esta asignatura
+                </label>
               </div>
               <div className="flex gap-2 justify-end">
                 <button
@@ -382,6 +437,7 @@ const ProyectoDocenteList = () => {
                     setSelectedPrograma('');
                     setSelectedAsignatura('');
                     setSesionesPorSemana(1);
+                    setCopyPreviousVersion(false);
                   }}
                   className="px-4 py-2 border border-[#F5A623] text-[#F5A623] rounded-lg hover:bg-[#FFFBF2] transition-colors"
                 >

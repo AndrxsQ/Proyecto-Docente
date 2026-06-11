@@ -65,7 +65,7 @@ func (s *ProyectoDocenteService) GetByID(id int) (*models.ProyectoDocente, error
 	return pd, nil
 }
 
-func (s *ProyectoDocenteService) Create(asignaturaID, docenteID, sesionesPorSemana int) (*models.ProyectoDocente, error) {
+func (s *ProyectoDocenteService) Create(asignaturaID, docenteID, sesionesPorSemana int, copyPrevious bool) (*models.ProyectoDocente, error) {
 	version, err := s.pdRepo.GetNextVersion(asignaturaID)
 	if err != nil {
 		return nil, err
@@ -86,8 +86,63 @@ func (s *ProyectoDocenteService) Create(asignaturaID, docenteID, sesionesPorSema
 		Activo:             false, // New projects are inactive by default
 	}
 
+	previousProjects, err := s.pdRepo.GetByAsignatura(asignaturaID)
+	if err != nil {
+		return nil, err
+	}
+
 	if err := s.pdRepo.Create(pd); err != nil {
 		return nil, err
+	}
+
+	if copyPrevious && len(previousProjects) > 0 {
+		previousID := previousProjects[0].ID
+
+		if previousFormato, err := s.formatoRepo.GetByProyectoDocenteID(previousID); err != nil {
+			return nil, err
+		} else if previousFormato != nil {
+			previousFormato.ID = 0
+			previousFormato.ProyectoDocenteID = pd.ID
+			if err := s.formatoRepo.Create(previousFormato); err != nil {
+				return nil, err
+			}
+		}
+
+		if previousContenido, err := s.contenidoRepo.GetByProyectoDocenteID(previousID); err != nil {
+			return nil, err
+		} else {
+			for _, item := range previousContenido {
+				item.ID = 0
+				item.ProyectoDocenteID = pd.ID
+				if err := s.contenidoRepo.Create(&item); err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		if previousBibliografia, err := s.bibliografiaRepo.GetByProyectoDocenteID(previousID); err != nil {
+			return nil, err
+		} else {
+			for _, item := range previousBibliografia {
+				item.ID = 0
+				item.ProyectoDocenteID = pd.ID
+				if err := s.bibliografiaRepo.Create(&item); err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		if previousResultados, err := s.resultadoAprendizajeCursoRepo.GetByProyectoDocenteID(previousID); err != nil {
+			return nil, err
+		} else {
+			for _, item := range previousResultados {
+				item.ID = 0
+				item.ProyectoDocenteID = pd.ID
+				if err := s.resultadoAprendizajeCursoRepo.Create(&item); err != nil {
+					return nil, err
+				}
+			}
+		}
 	}
 
 	return pd, nil
