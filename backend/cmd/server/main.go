@@ -26,7 +26,7 @@ func main() {
 	dbPassword := getEnv("DB_PASSWORD", "postgres")
 	dbName := getEnv("DB_NAME", "proyecto_docente")
 	jwtSecret := getEnv("JWT_SECRET", "secret-key-change-in-production")
-	serverPort := getEnv("SERVER_PORT", "8080")
+	serverPort := getEnv("PORT", "8080")
 
 	db, err := repository.NewDB(dbHost, dbPort, dbUser, dbPassword, dbName)
 	if err != nil {
