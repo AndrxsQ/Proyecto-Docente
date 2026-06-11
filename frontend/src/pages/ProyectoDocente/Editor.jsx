@@ -101,6 +101,15 @@ const ProyectoDocenteEditor = () => {
     }
   };
 
+  const saveFormatoSilent = async () => {
+    try {
+      await saveFormato(proyecto.id, formato);
+    } catch (error) {
+      console.error('Error saving formato:', error);
+      throw error;
+    }
+  };
+
   const handleUpdateContenido = async (item) => {
     setContenido(contenido.map(c => c.id === item.id ? item : c));
     if (item.tema && item.descripcion) {
@@ -188,6 +197,14 @@ const ProyectoDocenteEditor = () => {
   };
 
   const handleEnviar = async () => {
+    // First save the formato silently before sending
+    try {
+      await saveFormatoSilent();
+    } catch (error) {
+      alert('Error al guardar los cambios. Por favor intente de nuevo');
+      return;
+    }
+
     // Validate all fields before sending
     const errors = [];
     
