@@ -17,70 +17,35 @@ type DB struct {
 }
 
 func NewDB(host, port, user, password, dbname string) (*DB, error) {
-	// First, connect to postgres database to check if target database exists
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=postgres sslmode=disable",
-		host, port, user, password)
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
+		host, port, user, password, dbname)
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, fmt.Errorf("error opening database: %w", err)
 	}
-	defer db.Close()
 
 	if err = db.Ping(); err != nil {
 		return nil, fmt.Errorf("error connecting to database: %w", err)
 	}
 
-	// Check if database exists
-	var exists bool
-	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1)", dbname).Scan(&exists)
-	if err != nil {
-		return nil, fmt.Errorf("error checking if database exists: %w", err)
-	}
-
-	// Create database if it doesn't exist
-	if !exists {
-		log.Printf("Database %s does not exist, creating...", dbname)
-		_, err = db.Exec(fmt.Sprintf("CREATE DATABASE %s ENCODING 'UTF8'", dbname))
-		if err != nil {
-			return nil, fmt.Errorf("error creating database: %w", err)
-		}
-		log.Printf("Database %s created successfully", dbname)
-	}
-
-	// Now connect to the target database
-	connStr = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-
-	db, err = sql.Open("postgres", connStr)
-	if err != nil {
-		return nil, fmt.Errorf("error opening database: %w", err)
-	}
-
-	if err = db.Ping(); err != nil {
-		return nil, fmt.Errorf("error connecting to database: %w", err)
-	}
-
-	// Check if tables exist
+	// Solo corre el schema y seed si las tablas no existen
 	var tableExists bool
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'facultades')").Scan(&tableExists)
 	if err != nil {
-		return nil, fmt.Errorf("error checking if tables exist: %w", err)
+		return nil, fmt.Errorf("error checking tables: %w", err)
 	}
 
-	// If tables don't exist, run schema.sql and seed.sql
 	if !tableExists {
-		log.Println("Tables do not exist, running schema.sql...")
+		log.Println("Tables not found, running schema.sql...")
 		if err := executeSQLFile(db, "db/schema.sql"); err != nil {
 			return nil, fmt.Errorf("error executing schema.sql: %w", err)
 		}
-		log.Println("Schema created successfully")
-
 		log.Println("Running seed.sql...")
 		if err := executeSQLFile(db, "db/seed.sql"); err != nil {
 			return nil, fmt.Errorf("error executing seed.sql: %w", err)
 		}
-		log.Println("Seed data inserted successfully")
+		log.Println("Schema and seed executed successfully")
 	}
 
 	log.Println("Database connection established")
