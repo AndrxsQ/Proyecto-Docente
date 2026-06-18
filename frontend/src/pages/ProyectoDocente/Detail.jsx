@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getProyectoDocente, getSeguimiento, getContenido, aprobarProyectoDocente, denegarProyectoDocente } from '../../api/proyectosDocente';
 import { getResultadosAprendizajeCurso } from '../../api/resultadosAprendizajeCurso';
@@ -17,6 +17,7 @@ const ProyectoDocenteDetail = () => {
   const [activeTab, setActiveTab] = useState('Información');
   const [showDenyModal, setShowDenyModal] = useState(false);
   const [denyObservation, setDenyObservation] = useState('');
+  const pdfContentRef = useRef(null);
 
   useEffect(() => {
     fetchData();
@@ -133,15 +134,22 @@ const ProyectoDocenteDetail = () => {
   };
 
   const handleDescargar = () => {
-    const element = document.getElementById('pdf-content');
+    const element = pdfContentRef.current;
+    if (!element) {
+      console.error('No se encontró el contenido para generar el PDF');
+      alert('Error al generar el PDF: contenido no disponible');
+      return;
+    }
+
     const opt = {
       margin: 10,
       filename: `ProyectoDocente_${proyecto.asignatura?.nombre}_${proyecto.version}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas: { scale: 2, useCORS: true, windowWidth: element.scrollWidth },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
     };
-    
+
     html2pdf().set(opt).from(element).save();
   };
 
@@ -182,7 +190,7 @@ const ProyectoDocenteDetail = () => {
           </div>
         </div>
       </div>
- 
+
       <div>
         <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Información de la Asignatura</h3>
         <div className="grid grid-cols-2 gap-4">
@@ -220,7 +228,7 @@ const ProyectoDocenteDetail = () => {
           </div>
         </div>
       </div>
- 
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-[#7A7A7A] mb-1">Prerrequisitos</label>
@@ -233,7 +241,7 @@ const ProyectoDocenteDetail = () => {
       </div>
     </div>
   );
- 
+
   const renderContenido = () => (
     <div>
       <div className="border-b border-[#F0F0F0] pb-4 mb-4">
@@ -252,14 +260,14 @@ const ProyectoDocenteDetail = () => {
           </div>
         </div>
       </div>
- 
+
       {proyecto.formato && (
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Información General</h3>
           <p className="text-[#4A4A4A] mb-4">{proyecto.formato.descripcion}</p>
           <h3 className="text-lg font-semibold text-[#1E1E1E] mb-2">Resultados de Aprendizaje</h3>
           <p className="text-[#4A4A4A] mb-4 whitespace-pre-wrap">{proyecto.formato.resultados_aprendizaje}</p>
- 
+
           {resultadosAprendizajeCurso && resultadosAprendizajeCurso.length > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Contribuciones a Resultados de Aprendizaje</h3>
@@ -273,14 +281,14 @@ const ProyectoDocenteDetail = () => {
               </div>
             </div>
           )}
- 
+
           <h3 className="text-lg font-semibold text-[#1E1E1E] mb-2">Estrategias</h3>
           <p className="text-[#4A4A4A] mb-4 whitespace-pre-wrap">{proyecto.formato.estrategias}</p>
           <h3 className="text-lg font-semibold text-[#1E1E1E] mb-2">Evaluación</h3>
           <p className="text-[#4A4A4A] whitespace-pre-wrap">{proyecto.formato.evaluacion_resultados}</p>
         </div>
       )}
- 
+
       {proyecto.asignatura && (
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Contenido de la Asignatura</h3>
@@ -291,7 +299,7 @@ const ProyectoDocenteDetail = () => {
               map[`${item.semana}-${item.sesion}`] = item;
               return map;
             }, {});
- 
+
             const fullContent = [];
             for (let semana = 1; semana <= numSemanas; semana++) {
               for (let sesion = 1; sesion <= sesionesPorSemana; sesion++) {
@@ -303,7 +311,7 @@ const ProyectoDocenteDetail = () => {
                 });
               }
             }
- 
+
             return fullContent.map((item) => (
               <div key={`${item.semana}-${item.sesion}`} className="border-b border-[#F0F0F0] py-3">
                 <p className="font-semibold text-[#1E1E1E]">Semana {item.semana} - Sesión {item.sesion}</p>
@@ -320,7 +328,7 @@ const ProyectoDocenteDetail = () => {
           })()}
         </div>
       )}
- 
+
       {proyecto.bibliografia && proyecto.bibliografia.length > 0 && (
         <div>
           <h3 className="text-lg font-semibold text-[#1E1E1E] mb-4">Bibliografía</h3>
@@ -336,7 +344,7 @@ const ProyectoDocenteDetail = () => {
       )}
     </div>
   );
- 
+
   const renderSeguimiento = () => (
     <div>
       <div className="border-b border-[#F0F0F0] pb-4 mb-4">
@@ -355,7 +363,7 @@ const ProyectoDocenteDetail = () => {
           </div>
         </div>
       </div>
- 
+
       <div className="mb-4">
         <div className="flex justify-between mb-2">
           <span className="text-[#4A4A4A]">Avance Total</span>
@@ -365,12 +373,13 @@ const ProyectoDocenteDetail = () => {
           <div className={(avanceTotal === 100 ? 'bg-[#38A169]' : 'bg-[#F5A623]') + ' h-2.5 rounded-full'} style={{ width: `${avanceTotal}%` }}></div>
         </div>
       </div>
- 
+
       {(() => {
         const numSemanas = proyecto?.asignatura?.semanas || 16;
         const sesionesPorSemana = proyecto?.sesiones_por_semana || 1;
         const groupedByWeek = {};
- 
+
+        // Initialize all weeks
         for (let semana = 1; semana <= numSemanas; semana++) {
           groupedByWeek[semana] = [];
           for (let sesion = 1; sesion <= sesionesPorSemana; sesion++) {
@@ -384,7 +393,7 @@ const ProyectoDocenteDetail = () => {
             });
           }
         }
- 
+
         return Object.keys(groupedByWeek).sort((a, b) => parseInt(a) - parseInt(b)).map((weekNum) => (
           <div key={weekNum} className="border border-[#F0F0F0] p-4 rounded-xl mb-4">
             <div className="mb-4">
@@ -433,7 +442,6 @@ const ProyectoDocenteDetail = () => {
       })()}
     </div>
   );
-
 
   return (
     <div className="p-8">
@@ -497,12 +505,9 @@ const ProyectoDocenteDetail = () => {
         {activeTab === 'Contenido' && renderContenido()}
         {activeTab === 'Seguimiento' && renderSeguimiento()}
       </div>
-      
-      <div
-        style={{ position: 'absolute', top: 0, left: '-9999px', width: '210mm' }}
-        aria-hidden="true"
-      >
-        <div id="pdf-content" className="bg-white p-6">
+
+      <div style={{ height: 0, overflow: 'hidden' }} aria-hidden="true">
+        <div ref={pdfContentRef} style={{ width: '800px' }} className="bg-white p-6">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-[#1E1E1E] mb-4">Información</h2>
             {renderInformacion()}
