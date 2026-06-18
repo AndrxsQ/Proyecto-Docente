@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getProyectoDocente, getSeguimiento, getContenido, aprobarProyectoDocente, denegarProyectoDocente } from '../../api/proyectosDocente';
 import { getResultadosAprendizajeCurso } from '../../api/resultadosAprendizajeCurso';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import html2pdf from 'html2pdf.js';
 
 const ProyectoDocenteDetail = () => {
   const { id } = useParams();
@@ -95,6 +96,11 @@ const ProyectoDocenteDetail = () => {
     }
   };
 
+  const canDescargar = (proyecto) => {
+    const grupo = getPermissionGroup(user.rol);
+    return grupo === 'DOCENTE' && proyecto.docente?.id === user.id;
+  }
+
   const canDenegar = (proyecto) => {
     const grupo = getPermissionGroup(user.rol);
     // Same groups as approve can deny
@@ -126,6 +132,19 @@ const ProyectoDocenteDetail = () => {
     }
   };
 
+  const handleDescargar = () => {
+    const element = document.getElementById('pdf-content');
+    const opt = {
+      margin: 10,
+      filename: `ProyectoDocente_${proyecto.asignatura?.nombre}_${proyecto.version}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(element).save();
+  };
+
   const getAprobarButtonText = () => {
     const grupo = getPermissionGroup(user.rol);
     switch (grupo) {
@@ -150,6 +169,17 @@ const ProyectoDocenteDetail = () => {
               Volver
             </button>
             <h1 className="text-3xl font-bold text-[#1E1E1E]">{proyecto.asignatura?.nombre}</h1>
+          </div>
+          <div className="flex gap-2">
+            {canDescargar(proyecto) && (
+              <button
+                onClick={handleDescargar}
+                className="flex items-center text-[#4A4A4A] hover:text-[#1E1E1E] mb-2"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Descargar
+              </button>
+            )}
           </div>
           <div className="flex gap-2">
             {canDenegar(proyecto) && (
@@ -186,7 +216,7 @@ const ProyectoDocenteDetail = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div id="pdf-content" className="bg-white rounded-xl shadow-sm p-6">
         {activeTab === 'Información' && (
           <div className="space-y-6">
             <div className="border-b border-[#F0F0F0] pb-4">
